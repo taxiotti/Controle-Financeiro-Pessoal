@@ -1,0 +1,349 @@
+openapi: 3.0.3
+info:
+  title: Controle Financeiro Pessoal API
+  version: 0.1.0
+  description: Contrato compartilhado. Mudanças de campo exigem atualizar este arquivo no mesmo PR.
+servers:
+  - url: /api
+tags:
+  - name: Categorias
+  - name: Transacoes
+  - name: Relatorios
+  - name: Exportacao
+  - name: Auth
+
+components:
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+    Categoria:
+      type: object
+      required: [id, nome, tipo, cor, icone, padrao]
+      properties:
+        id: { type: string, format: uuid }
+        nome: { type: string }
+        tipo: { type: string, enum: [receita, despesa, ambos] }
+        cor: { type: string, example: "#22C55E" }
+        icone: { type: string, example: utensils }
+        padrao: { type: boolean }
+    CategoriaInput:
+      type: object
+      required: [nome, tipo, cor, icone]
+      properties:
+        nome: { type: string, minLength: 2, maxLength: 40 }
+        tipo: { type: string, enum: [receita, despesa, ambos] }
+        cor: { type: string, pattern: "^#[0-9A-Fa-f]{6}$" }
+        icone: { type: string }
+    Transacao:
+      type: object
+      required: [id, tipo, valor, descricao, data, categoriaId]
+      properties:
+        id: { type: string, format: uuid }
+        tipo: { type: string, enum: [receita, despesa] }
+        valor: { type: string, description: Decimal como string, example: "150.90" }
+        descricao: { type: string }
+        data: { type: string, format: date }
+        categoriaId: { type: string, format: uuid }
+        categoria: { $ref: "#/components/schemas/Categoria" }
+    TransacaoInput:
+      type: object
+      required: [tipo, valor, descricao, data, categoriaId]
+      properties:
+        tipo: { type: string, enum: [receita, despesa] }
+        valor: { type: number, exclusiveMinimum: 0 }
+        descricao: { type: string, minLength: 1, maxLength: 120 }
+        data: { type: string, format: date }
+        categoriaId: { type: string, format: uuid }
+    PaginaTransacoes:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Transacao" }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+    ResumoMensal:
+      type: object
+      required: [ano, mes, totalReceitas, totalDespesas, saldo]
+      properties:
+        ano: { type: integer }
+        mes: { type: integer, minimum: 1, maximum: 12 }
+        totalReceitas: { type: string, example: "5000.00" }
+        totalDespesas: { type: string, example: "3200.50" }
+        saldo: { type: string, example: "1799.50" }
+    FatiaPizza:
+      type: object
+      required: [categoriaId, nome, cor, total]
+      properties:
+        categoriaId: { type: string, format: uuid }
+        nome: { type: string }
+        cor: { type: string }
+        total: { type: string }
+    PontoEvolucao:
+      type: object
+      required: [ano, mes, totalReceitas, totalDespesas]
+      properties:
+        ano: { type: integer }
+        mes: { type: integer }
+        totalReceitas: { type: string }
+        totalDespesas: { type: string }
+    Comparativo:
+      type: object
+      required: [atual, anterior, variacaoReceitas, variacaoDespesas, variacaoSaldo]
+      properties:
+        atual: { $ref: "#/components/schemas/ResumoMensal" }
+        anterior: { $ref: "#/components/schemas/ResumoMensal" }
+        variacaoReceitas: { type: string }
+        variacaoDespesas: { type: string }
+        variacaoSaldo: { type: string }
+
+paths:
+  /categorias:
+    get:
+      tags: [Categorias]
+      summary: Lista categorias do usuário
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Categoria" }
+    post:
+      tags: [Categorias]
+      summary: Cria categoria customizada
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CategoriaInput" }
+      responses:
+        "201":
+          description: Criada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Categoria" }
+        "400":
+          description: Validação
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /categorias/{id}:
+    patch:
+      tags: [Categorias]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CategoriaInput" }
+      responses:
+        "200":
+          description: Atualizada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Categoria" }
+        "404": { description: Não encontrada }
+    delete:
+      tags: [Categorias]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Removida }
+        "409":
+          description: Padrão ou em uso
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /transacoes:
+    get:
+      tags: [Transacoes]
+      summary: Lista paginada com filtros
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, default: 20, maximum: 100 }
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+        - in: query
+          name: tipo
+          schema: { type: string, enum: [receita, despesa] }
+        - in: query
+          name: categoriaId
+          schema: { type: string, format: uuid }
+        - in: query
+          name: minValor
+          schema: { type: number }
+        - in: query
+          name: maxValor
+          schema: { type: number }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaginaTransacoes" }
+    post:
+      tags: [Transacoes]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TransacaoInput" }
+      responses:
+        "201":
+          description: Criada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Transacao" }
+        "400": { description: Validação }
+  /transacoes/{id}:
+    patch:
+      tags: [Transacoes]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TransacaoInput" }
+      responses:
+        "200":
+          description: Atualizada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Transacao" }
+        "404": { description: Não encontrada }
+    delete:
+      tags: [Transacoes]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Removida }
+  /relatorios/resumo:
+    get:
+      tags: [Relatorios]
+      parameters:
+        - in: query
+          name: ano
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: mes
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ResumoMensal" }
+  /relatorios/pizza:
+    get:
+      tags: [Relatorios]
+      parameters:
+        - in: query
+          name: ano
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: mes
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: tipo
+          schema: { type: string, enum: [despesa, receita], default: despesa }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/FatiaPizza" }
+  /relatorios/evolucao:
+    get:
+      tags: [Relatorios]
+      parameters:
+        - in: query
+          name: meses
+          schema: { type: integer, default: 6, maximum: 24 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PontoEvolucao" }
+  /relatorios/comparativo:
+    get:
+      tags: [Relatorios]
+      parameters:
+        - in: query
+          name: ano
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: mes
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Comparativo" }
+  /transacoes/export:
+    get:
+      tags: [Exportacao]
+      summary: CSV da listagem (mesmos filtros de GET /transacoes)
+      responses:
+        "200":
+          description: text/csv
+          content:
+            text/csv:
+              schema: { type: string }
+  /auth/register:
+    post:
+      tags: [Auth]
+      description: Implementação via Auth.js; este path é o contrato lógico da Duda (pode ser Server Action).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nome, email, senha]
+              properties:
+                nome: { type: string }
+                email: { type: string, format: email }
+                senha: { type: string, minLength: 8 }
+      responses:
+        "201": { description: Conta criada }
+        "409": { description: E-mail já existe }
