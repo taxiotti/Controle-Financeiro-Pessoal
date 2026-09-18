@@ -1,59 +1,53 @@
 # Research: Controle Financeiro Pessoal
 
-**Date**: 2026-09-14
+**Date**: 2026-09-18
 
-## 1. Next.js único vs React + Express
+## 1. React + Vite e FastAPI
 
-**Decision**: Next.js App Router full-stack neste repositório.
+**Decision**: manter a SPA React + TypeScript + Vite em `Front-end/` e implementar o backend futuramente como serviço FastAPI separado.
 
-**Rationale**: o grupo já desenhou pastas `app/`, `api/` e o setup da Natalia cita Next.js + Tailwind + shadcn. Evita dois deploys e duplicação de tipos.
+**Rationale**: o protótipo Vite já existe e FastAPI é a tecnologia definida para a API. O contrato `contracts/openapi.yaml` desacopla as entregas e evita que as páginas dependam da implementação do servidor.
 
-**Rejected**: React+Vite+Express — mais arquivos e contrato HTTP extra sem ganho para 5 pessoas.
+**Frontend-only atual**: US1–US5 usam um adapter `localStorage` com as mesmas entidades, filtros, paginação e agregações do contrato. Nenhuma rota FastAPI é criada nesta etapa.
 
-## 2. Prisma + SQLite (dev)
+## 2. Persistência futura
 
-**Decision**: Prisma ORM; `datasource` SQLite no `.env` local. Modelos com `String` UUID (`@id @default(uuid())`) e `Decimal` para valores.
+**Decision**: FastAPI + Pydantic para transporte/validação e SQLAlchemy ou SQLModel para persistência; SQLite no desenvolvimento, com desenho migrável para PostgreSQL.
 
-**Rationale**: João precisa de migrations visíveis. SQLite zera atrito (sem Docker obrigatório). Decimal evita erro de float em dinheiro.
+**Rationale**: Pydantic mantém validação explícita no limite HTTP; tipos decimais no Python e no banco evitam erro visível de ponto flutuante.
 
-**Rejected**: Drizzle nesta v1 (o grupo mencionou Prisma nas tarefas do João com mais frequência). Troca depois exigiria reescrever tasks.
+## 3. Autenticação
 
-## 3. Auth.js (NextAuth) + credentials
+**Decision**: a US6 será definida no serviço FastAPI, com senha armazenada por hash e sessão/token seguro. O mecanismo exato será fechado antes da implementação da US6.
 
-**Decision**: Auth.js no App Router, provider Credentials, senha com bcrypt. Sessão JWT (strategy jwt) para simplicidade em SQLite.
+**Rejected**: autenticação apenas no client; ela não fornece isolamento nem segurança. A fase frontend-only opera com usuário único implícito.
 
-**Rationale**: bate com a demanda da Duda (login/registro, middleware, isolamento). Sem OAuth nesta versão.
+## 4. Contrato e estado no cliente
 
-**Rejected**: auth só no client; NextAuth OAuth-only (Google) — foge do cadastro e-mail/senha da spec.
+**Decision**: TanStack Query para consultas/mutações; React Hook Form + Zod no cliente; modelos Pydantic equivalentes no FastAPI.
 
-## 4. Momento da autenticação
+**Rationale**: o frontend não reutiliza código Python, mas os dois lados seguem os mesmos schemas e status descritos no OpenAPI.
 
-**Decision**: schema já nasce com `usuarioId` opcional OU seed de um usuário de desenvolvimento. Rotas P1/P2 podem usar um `DEV_USER_ID` até a US6; depois o middleware torna `usuarioId` obrigatório.
+## 5. Dinheiro e datas
 
-**Rationale**: constituição exige MVP sem auth. João modela `usuarios` cedo (tarefa dele) para não refazer FK.
+**Decision**: respostas monetárias são strings decimais; o adapter local persiste strings e calcula em centavos inteiros. A API futura deve usar `Decimal`. “Mês corrente” usa a data da transação em `America/Sao_Paulo`.
 
-**Implementation note**: documentar no `quickstart.md` o usuário seed (`dev@local.test`).
+## 6. Gráficos
 
-## 5. Gráficos
+**Decision**: Recharts no frontend. O adapter local agrega todas as transações, não apenas a página visível; no backend futuro, as agregações passam aos endpoints `/relatorios/*`.
 
-**Decision**: Recharts. Agregação sempre no servidor (endpoints `/api/relatorios/*`). Componentes do Taxiotti só recebem JSON já somado.
+**Acessibilidade**: cada gráfico acompanha uma tabela com os mesmos valores.
 
-**Rationale**: totais não podem depender da página atual da lista. Acessibilidade: cada gráfico acompanha tabela resumida.
+## 7. Fora de escopo atual
 
-## 6. Estado no cliente
-
-**Decision**: TanStack Query para GET/mutações; React Hook Form + Zod no cliente, **mesmo schema Zod** (ou equivalente) reutilizado em `lib/validations.ts` nas Route Handlers.
-
-## 7. Fora de escopo (não pesquisar implementação agora)
-
-Recorrência automática, PDF, PWA, push/e-mail, Open Finance, tema dark como aceite.
+Backend FastAPI, autenticação, CSV, recorrência automática, PDF, PWA, notificações, Open Finance e tema escuro.
 
 ## 8. Papéis e fronteiras
 
-| Área | Dono | Não faz |
+| Área | Dono | Fronteira |
 |---|---|---|
-| Prisma, rotas API, queries | João | CSS/layout de páginas |
-| shadcn, forms, tabelas, filtros UI | Nakashima | SQL/Prisma |
-| Dashboard, Recharts, responsivo visual | Taxiotti | endpoints |
-| NextAuth, middleware, CSV | Duda | CRUD de categoria/transação |
-| create-next-app, wiring, QA | Natalia | reimplementar o que o dono já fez |
+| FastAPI, Pydantic, persistência e queries | João | `contracts/openapi.yaml` |
+| Forms, tabelas, filtros e navegação | Nakashima | `Front-end/src/` |
+| Dashboard, Recharts e responsividade | Taxiotti | DTOs de relatório |
+| Auth e CSV | Duda | API FastAPI após US6 |
+| Setup, adapter, integração e QA | Natalia | contrato e quickstart |

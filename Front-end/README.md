@@ -1,75 +1,49 @@
-# React + TypeScript + Vite
+# Clarus — Front-end
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SPA de controle financeiro pessoal guiada pelas specs em
+`specs/001-controle-financeiro/`.
 
-Currently, two official plugins are available:
+## Executar
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Requisitos: Node.js 20+ e npm.
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+O Vite informa a URL local, normalmente `http://localhost:5173`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Verificações
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm run lint
+npm test
+npm run build
 ```
+
+## Escopo atual
+
+- US1: categorias padrão e CRUD de categorias customizadas.
+- US2: CRUD e paginação de transações.
+- US3: resumo do mês corrente.
+- US4: filtros persistidos na URL.
+- US5: pizza por categoria, evolução mensal e comparativo.
+- UI em português, BRL, datas brasileiras e layout responsivo.
+
+## Dados locais
+
+Esta etapa não possui backend. O adapter em `src/api/localClient.ts` grava
+categorias e transações na chave versionada `cfp:v1:data` do `localStorage`.
+Limpar os dados do site recria as nove categorias padrão.
+
+Os tipos em `src/api/types.ts` seguem
+`specs/001-controle-financeiro/contracts/openapi.yaml`. Quando a API FastAPI
+estiver pronta, um adapter HTTP poderá substituir o cliente local sem mudar
+as páginas.
+
+## Limites
+
+Autenticação, isolamento real entre usuários, CSV e o serviço FastAPI ainda
+não foram implementados. O armazenamento local serve para desenvolvimento e
+demonstração; não deve ser tratado como proteção de dados financeiros.

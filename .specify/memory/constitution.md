@@ -1,8 +1,8 @@
 <!--
   Sync Impact Report (remover antes do commit se o grupo preferir)
-  Version change: (nenhuma) → 1.0.0
-  Modified principles: scaffold → princípios do Controle Financeiro Pessoal
-  Added sections: Constraints de Produto; Fluxo do Grupo
+  Version change: 1.0.0 → 1.1.0
+  Modified principles: IV (validação FastAPI/Pydantic); Constraints de Produto
+  Added sections: nenhum
   Removed sections: nenhum
   TODOs: nenhum
 -->
@@ -32,8 +32,8 @@ O frontend MUST NÃO inventar formatos paralelos.
 
 ### IV. Isolamento e validação no servidor
 Quando a autenticação existir, toda leitura e escrita MUST filtrar pelo
-usuário autenticado. Inputs MUST ser validados no servidor (Zod), mesmo que
-já existam no cliente. Senhas MUST ser armazenadas apenas como hash.
+usuário autenticado. Inputs MUST ser validados no servidor com Pydantic,
+mesmo que já existam no cliente. Senhas MUST ser armazenadas apenas como hash.
 **Rationale**: filtro só no cliente não é segurança.
 
 ### V. UX brasileira, acessível e honesta
@@ -46,9 +46,10 @@ Tema claro/escuro SHOULD ser suportado sem atrasar o MVP.
 ## Constraints de Produto
 
 - Idioma da interface e das specs: português (Brasil).
-- Stack v1 travada: Next.js (App Router) + TypeScript + Tailwind + shadcn/ui +
-  Prisma + SQLite em desenvolvimento + Auth.js (NextAuth) + Recharts.
-- Uma aplicação full-stack neste repositório (não dois serviços separados).
+- Stack v1: React + TypeScript + Vite no frontend; FastAPI + Pydantic +
+  SQLAlchemy/SQLModel no backend; SQLite em desenvolvimento; Recharts.
+- Frontend e backend são serviços separados e MUST compartilhar os formatos
+  definidos em `specs/*/contracts/openapi.yaml`.
 - Dados financeiros são sensíveis: NUNCA commitar `.env`, secrets ou dumps
   com senha real.
 
@@ -73,4 +74,4 @@ PRs e revisões MUST checar isolamento de dados, contrato de API e critérios
 de aceite da história. Complexidade extra MUST ser justificada em
 `plan.md` (Complexity Tracking).
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-14 | **Last Amended**: 2026-09-14
+**Version**: 1.1.0 | **Ratified**: 2026-09-14 | **Last Amended**: 2026-09-18

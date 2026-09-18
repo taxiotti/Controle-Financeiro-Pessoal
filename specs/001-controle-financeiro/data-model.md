@@ -69,6 +69,11 @@ Delete: usuário em cascata (quando existir). Categoria: Restrict se houver tran
 - `Categoria(usuarioId, nome)` único
 - `Usuario(email)` único
 
-## Prisma (esboço)
+## Persistência FastAPI (direção)
 
-João implementa em `prisma/schema.prisma`. Campos em camelCase no Prisma; JSON da API em camelCase (igual ao contrato).
+João implementará os modelos com SQLAlchemy ou SQLModel no futuro serviço
+FastAPI. Valores financeiros usam `Decimal`, nunca `float`. Os schemas
+Pydantic e o JSON da API mantêm camelCase e os formatos definidos no contrato.
+
+Enquanto o backend não existe, o adapter do Front-end persiste a mesma forma
+JSON em `localStorage`, com versão de schema e valores decimais como string.

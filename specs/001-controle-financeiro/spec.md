@@ -195,10 +195,11 @@ Como usuário autenticado, quero baixar a listagem (respeitando filtros ativos) 
 ## Assumptions
 
 - Público: estudantes/grupo acadêmico e uso pessoal, não banco comercial.
-- v1 escolhe Next.js full-stack neste repositório (não React+Express separado).
-- Desenvolvimento usa SQLite; schema Prisma deve poder migrar para PostgreSQL depois.
-- Auth.js (NextAuth) com credenciais (e-mail/senha) e hash bcrypt; sem OAuth nesta versão.
-- Gráficos: Recharts. Formulários: React Hook Form + Zod. UI: Tailwind + shadcn/ui.
+- v1 usa React + TypeScript + Vite em `Front-end/` e uma API FastAPI separada quando o backend for iniciado.
+- Até a API FastAPI existir, US1–US5 operam por um adapter local versionado que preserva os formatos do contrato OpenAPI.
+- O backend futuro usa SQLite em desenvolvimento e deve permitir migração para PostgreSQL.
+- Autenticação será definida no FastAPI com credenciais (e-mail/senha) e hash seguro; sem OAuth nesta versão.
+- Gráficos: Recharts. Formulários: React Hook Form + Zod. UI: CSS próprio responsivo.
 - Recorrência: o campo `recorrente` NÃO faz parte do MVP (pode existir no banco como `false` fixo, sem UI).
 - Tema claro/escuro é desejável, mas não bloqueia aceite das histórias P1–P4.
 - Um único app, sem multi-moeda (apenas BRL).

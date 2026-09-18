@@ -1,6 +1,7 @@
 # Quickstart — Controle Financeiro Pessoal
 
-Para o grupo subir o app depois do setup (Natalia) e do schema (João).
+Para o grupo subir o Front-end com dados locais. A API FastAPI será adicionada
+em uma etapa futura e não é necessária para executar US1–US5.
 
 ## Pré-requisitos
 
@@ -11,21 +12,18 @@ Para o grupo subir o app depois do setup (Natalia) e do schema (João).
 ## Primeira vez
 
 ```bash
+cd Front-end
 npm install
-copy .env.example .env
-npx prisma migrate dev
-npx prisma db seed
 npm run dev
 ```
 
-Abra `http://localhost:3000`.
+Abra a URL informada pelo Vite (normalmente `http://localhost:5173`).
 
-## Usuário de desenvolvimento (após seed)
+## Dados locais
 
-- E-mail: `dev@local.test`
-- Senha: ver `.env.example` (`DEV_USER_PASSWORD`)
-
-Antes da US6, o app pode operar só com esse usuário implícito.
+Antes da US6, o app opera com usuário único implícito. Categorias e transações
+ficam no `localStorage` deste navegador. Limpar os dados do site reinicia o
+adapter e recria as nove categorias padrão.
 
 ## Rotas da UI
 
@@ -39,16 +37,13 @@ Antes da US6, o app pode operar só com esse usuário implícito.
 
 ## Ordem segura de desenvolvimento
 
-1. Natalia: `create-next-app`, Tailwind, shadcn, Spec Kit já existente.
-2. João: Prisma + seed + `GET/POST /api/categorias`.
-3. Nakashima: UI categorias contra a API (ou mock no formato do contrato).
-4. João: CRUD transações + resumo.
-5. Nakashima + Taxiotti em paralelo (forms vs cards).
-6. Natalia liga telas ↔ APIs e trata erros.
-7. João: filtros + relatórios JSON.
-8. Taxiotti: gráficos. Natalia integra.
-9. João: `usuarios` + FK. Duda: Auth.js + middleware + isolamento.
-10. Duda: CSV. Natalia: QA dos fluxos.
+1. Natalia: setup Vite, dependências e adapter local alinhado ao contrato.
+2. Nakashima: categorias, transações, validações, filtros e paginação.
+3. Taxiotti: cards, gráficos, comparativo e responsividade.
+4. Natalia: integração local, estados de erro e QA US1–US5.
+5. João, em etapa futura: FastAPI + Pydantic + persistência e endpoints.
+6. Natalia troca o adapter local pelo HTTP quando o contrato estiver implementado.
+7. Duda implementa autenticação e CSV após a API.
 
 ## Conferência rápida do MVP (P1)
 
