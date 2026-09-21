@@ -1,32 +1,32 @@
 # Implementation Plan: Controle Financeiro Pessoal
 
-**Branch**: `001-controle-financeiro` | **Date**: 2026-09-14 | **Spec**: [spec.md](./spec.md)
+**Branch**: `001-controle-financeiro` | **Date**: 2026-09-18 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `/specs/001-controle-financeiro/spec.md`
 
 ## Summary
 
-App web full-stack para uma pessoa registrar receitas/despesas por categoria e ver resumo e relatórios mensais. Implementação em **Next.js (App Router) + TypeScript**, UI **Tailwind + shadcn/ui**, persistência **Prisma + SQLite** (dev), gráficos **Recharts**, validação **Zod**, auth **Auth.js (NextAuth) + bcrypt** na fase P3. Frontend e API convivem no mesmo repositório; o contrato REST em `contracts/` é a fronteira entre João (API), Nakashima/Taxiotti (UI) e Natalia (integração).
+App web para registrar receitas/despesas por categoria e ver resumo e relatórios mensais. **Dois serviços** no mesmo repositório: UI em **React + Vite** (`Front-end/`) e API em **Python + FastAPI** (`backend/`). Persistência **SQLAlchemy 2 + SQLite** (sem migrations: `create_all` na subida). Gráficos **Recharts**, forms **React Hook Form + Zod**, validação no servidor **Pydantic**. Auth **JWT** no FastAPI (fase P3). O contrato REST em `contracts/openapi.yaml` é a fronteira entre João (API), Nakashima/Taxiotti (UI) e Natalia (integração). CORS libera `http://localhost:5173`.
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x, Node.js 20 LTS, React 18+
+**Language/Version**: TypeScript 5.x (UI), Python 3.12 (API), Node.js 20 LTS, React 18+
 
-**Primary Dependencies**: Next.js 14+ App Router, Tailwind CSS, shadcn/ui, Prisma, Auth.js (NextAuth), bcrypt, Zod, React Hook Form, TanStack Query, Recharts
+**Primary Dependencies**: Vite, Tailwind, shadcn/ui, FastAPI, SQLAlchemy 2, Pydantic, passlib/bcrypt, python-jose, React Hook Form, Zod, TanStack Query, Recharts
 
-**Storage**: SQLite via Prisma em desenvolvimento; schema compatível com PostgreSQL depois (`provider` trocável)
+**Storage**: SQLite via SQLAlchemy em desenvolvimento (`Base.metadata.create_all`); sem Alembic. PostgreSQL fica fora desta versão.
 
-**Testing**: Playwright ou testes manuais de aceite por história (grupo acadêmico; testes automatizados não são obrigatórios nesta v1)
+**Testing**: testes manuais de aceite por história; pytest opcional em `backend/tests/`
 
-**Target Platform**: Navegador moderno (Chrome/Edge/Firefox/Safari); viewport mobile ~375px e desktop ~1280px
+**Target Platform**: Navegador moderno; viewport mobile ~375px e desktop ~1280px; API local na porta 8000
 
-**Project Type**: Web application full-stack (único pacote Next.js)
+**Project Type**: Web application (SPA + API REST)
 
 **Performance Goals**: listagem paginada e resumo mensal < 2s com ~200 transações em local
 
-**Constraints**: BRL only; validação no servidor; sem secrets no git; pt-BR na UI; HTTPS só exigido em produção futura
+**Constraints**: BRL only; validação no servidor; sem secrets no git; pt-BR na UI; HTTPS só em produção futura
 
-**Scale/Scope**: 5 integrantes, 1 app, ~4 rotas autenticadas, 3 entidades, 7 user stories
+**Scale/Scope**: 5 integrantes, 2 pastas de código, ~4 rotas autenticadas, 3 entidades, 7 user stories
 
 ## Constitution Check
 
@@ -36,11 +36,9 @@ App web full-stack para uma pessoa registrar receitas/despesas por categoria e v
 |---|---|---|
 | I. Produto antes de tecnologia | PASS | Stories P1–P4 mapeadas em `tasks.md` |
 | II. Entrega incremental | PASS | Auth e CSV depois do MVP; recorrência/PDF/PWA fora |
-| III. Contrato de API compartilhado | PASS | `contracts/openapi.yaml` |
-| IV. Isolamento e validação no servidor | PASS | `usuarioId` após US6; Zod nas rotas |
+| III. Contrato de API compartilhado | PASS | `contracts/openapi.yaml` servido em `/api` |
+| IV. Isolamento e validação no servidor | PASS | `usuario_id` após US6; Pydantic nas rotas |
 | V. UX brasileira e acessível | PASS | `Intl` pt-BR; confirmação delete; labels; texto nos gráficos |
-
-Violations: nenhuma. Complexity Tracking vazio.
 
 ## Project Structure
 
@@ -62,49 +60,37 @@ specs/001-controle-financeiro/
 ### Source Code (repository root)
 
 ```text
-app/
-├── (auth)/
-│   ├── login/page.tsx
-│   └── register/page.tsx
-├── (dashboard)/
-│   ├── layout.tsx
-│   ├── page.tsx                 # resumo (Taxiotti)
-│   ├── transacoes/page.tsx      # Nakashima
-│   ├── categorias/page.tsx      # Nakashima
-│   └── relatorios/page.tsx      # Taxiotti
-├── api/
-│   ├── auth/[...nextauth]/route.ts
-│   ├── transacoes/route.ts
-│   ├── transacoes/[id]/route.ts
-│   ├── categorias/route.ts
-│   ├── categorias/[id]/route.ts
-│   ├── relatorios/resumo/route.ts
-│   ├── relatorios/pizza/route.ts
-│   ├── relatorios/evolucao/route.ts
-│   ├── relatorios/comparativo/route.ts
-│   └── transacoes/export/route.ts
-components/
-├── ui/                          # shadcn + base (Nakashima)
-├── transacao-form.tsx
-├── categoria-form.tsx
-├── transacao-filtros.tsx
-├── resumo-cards.tsx
-├── grafico-pizza.tsx
-├── grafico-linha.tsx
-└── comparativo-mes.tsx
-lib/
-├── db.ts
-├── auth.ts
-├── validations.ts
-├── utils.ts                     # formatMoney, formatDate
-└── api-client.ts
-prisma/
-├── schema.prisma
-└── seed.ts                      # categorias padrão
+Front-end/                         # Vite + React (Nakashima, Taxiotti, Duda UI, Natalia)
+├── src/
+│   ├── pages/                     # ou rotas equivalentes
+│   ├── components/
+│   │   ├── ui/
+│   │   ├── transacao-form.tsx
+│   │   ├── categoria-form.tsx
+│   │   ├── transacao-filtros.tsx
+│   │   ├── resumo-cards.tsx
+│   │   ├── grafico-pizza.tsx
+│   │   ├── grafico-linha.tsx
+│   │   └── comparativo-mes.tsx
+│   └── lib/
+│       ├── api-client.ts          # baseURL = VITE_API_URL
+│       └── utils.ts
+
+backend/                           # FastAPI (João, Duda auth/CSV)
+├── app/
+│   ├── main.py
+│   ├── seed.py
+│   ├── core/                      # config, database, security
+│   ├── models/                    # Usuario, Categoria, Transacao
+│   ├── schemas/                   # Pydantic = contrato
+│   └── api/v1/endpoints/          # categorias, transacoes, relatorios, auth
+└── tests/
 ```
 
-**Structure Decision**: um único projeto Next.js na raiz (opção web full-stack), alinhado à pasta proposta pelo grupo e à demanda de setup da Natalia. Sem `frontend/` e `backend/` separados.
+**Structure Decision**: dois projetos (`Front-end/` já existia em Vite; API em Python/FastAPI a pedido do grupo). Não usar Route Handlers do Next.js.
 
 ## Complexity Tracking
 
-> Nenhuma violação da constituição a justificar.
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|-------------------------------------|
+| Dois serviços (SPA + API) | Front-end já é Vite; backend será Python | Next.js monolito contradiz a pasta `Front-end/` e a escolha FastAPI |

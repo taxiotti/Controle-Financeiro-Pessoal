@@ -16,7 +16,7 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 - **[P]**: pode em paralelo (arquivo diferente)
 - **[Story]**: US1…US7
-- Caminhos reais do plano Next.js
+- Caminhos reais: `backend/` (FastAPI) e `Front-end/` (Vite)
 
 ---
 
@@ -24,12 +24,12 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Purpose**: repositório pronto para todo mundo clonar e rodar
 
-- [ ] T001 [Natalia] Criar app Next.js (App Router + TypeScript) na raiz do repo sem apagar `.specify/`, `.cursor/` nem `specs/`
-- [ ] T002 [Natalia] Configurar Tailwind, shadcn/ui, pasta `components/ui`, ESLint e `.env.example` (`DATABASE_URL`, `NEXTAUTH_SECRET`, `DEV_USER_PASSWORD`)
-- [ ] T003 [P] [Natalia] Adicionar Prisma, TanStack Query, React Hook Form, Zod, Recharts, lucide-react e scripts `prisma migrate` / `db seed` no `package.json`
-- [ ] T004 [P] [Natalia] Ajustar README com o fluxo do `quickstart.md` e apontar `specs/001-controle-financeiro/`
+- [x] T001 [Natalia] Garantir pasta `Front-end/` (Vite+React) e `backend/` (FastAPI) sem apagar `.specify/`, `.cursor/` nem `specs/`
+- [ ] T002 [Natalia] Configurar Tailwind, shadcn/ui em `Front-end/`, `VITE_API_URL=http://localhost:8000/api`
+- [ ] T003 [P] [Natalia] Adicionar no Front-end TanStack Query, React Hook Form, Zod, Recharts, lucide-react
+- [ ] T004 [P] [Natalia] Ajustar README com o fluxo do `quickstart.md` (API 8000 + UI 5173)
 
-**Checkpoint**: `npm install && npm run dev` sobe a página vazia
+**Checkpoint**: `uvicorn` em :8000 e `npm run dev` em :5173
 
 ---
 
@@ -39,14 +39,14 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **⚠️ CRITICAL**: histórias de produto só depois desta fase
 
-- [ ] T005 [João] Escrever `prisma/schema.prisma` (Usuario, Categoria, Transacao), índices de `data-model.md` e primeira migration
-- [ ] T006 [João] Implementar `prisma/seed.ts` (usuário `dev@local.test` + categorias padrão) e `lib/db.ts`
-- [ ] T007 [P] [João] Criar `lib/validations.ts` (Zod de categoria e transação) alinhado a `contracts/openapi.yaml`
-- [ ] T008 [P] [Nakashima] Instalar componentes shadcn necessários (Button, Input, Label, Dialog, Table, Select, Card, Alert) em `components/ui/`
-- [ ] T009 [Nakashima] Layout do dashboard em `app/(dashboard)/layout.tsx` (nav: Início, Transações, Categorias, Relatórios)
-- [ ] T010 [P] [Natalia] `lib/utils.ts` (`formatMoney`, `formatDate` pt-BR) e `lib/api-client.ts` (fetch JSON com tratamento de erro)
+- [ ] T005 [João] Completar models SQLAlchemy em `backend/app/models/` e índices de `data-model.md` (tabelas via `create_all` na subida da API; sem migrations)
+- [ ] T006 [João] Implementar `backend/app/seed.py` (usuário `dev@local.test` + categorias padrão)
+- [ ] T007 [P] [João] Completar schemas Pydantic em `backend/app/schemas/` alinhados a `contracts/openapi.yaml`
+- [ ] T008 [P] [Nakashima] Instalar componentes shadcn (Button, Input, Label, Dialog, Table, Select, Card, Alert) em `Front-end/src/components/ui/`
+- [ ] T009 [Nakashima] Layout/nav do dashboard no Front-end (Início, Transações, Categorias, Relatórios)
+- [ ] T010 [P] [Natalia] `Front-end/src/lib/utils.ts` (`formatMoney`, `formatDate`) e `api-client.ts` (`VITE_API_URL`)
 
-**Checkpoint**: Prisma gera client; layout navega entre rotas vazias
+**Checkpoint**: SQLite criado na subida da API; layout navega entre rotas vazias; `/health` responde ok
 
 ---
 
@@ -56,10 +56,10 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Independent Test**: criar/editar categoria e recarregar a página
 
-- [ ] T011 [US1] [João] `GET`/`POST` `app/api/categorias/route.ts`
-- [ ] T012 [US1] [João] `PATCH`/`DELETE` `app/api/categorias/[id]/route.ts` (409 se padrão ou em uso)
-- [ ] T013 [P] [US1] [Nakashima] `components/categoria-form.tsx` (modal, cor, ícone, validação)
-- [ ] T014 [US1] [Nakashima] Página `app/(dashboard)/categorias/page.tsx` (tabela + ações)
+- [ ] T011 [US1] [João] `GET`/`POST` em `backend/app/api/v1/endpoints/categorias.py`
+- [ ] T012 [US1] [João] `PATCH`/`DELETE` em `categorias.py` (409 se padrão ou em uso)
+- [ ] T013 [P] [US1] [Nakashima] `Front-end/src/components/categoria-form.tsx` (modal, cor, ícone, validação)
+- [ ] T014 [US1] [Nakashima] Página de categorias no Front-end (tabela + ações)
 - [ ] T015 [US1] [Natalia] Ligar a página às APIs, toasts de erro/sucesso, conferir seed padrão
 
 **Checkpoint**: US1 testável sem transações
@@ -72,10 +72,10 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Independent Test**: criar receita e despesa, editar, excluir com confirmação
 
-- [ ] T016 [US2] [João] `GET` (paginação) / `POST` `app/api/transacoes/route.ts`
-- [ ] T017 [US2] [João] `PATCH`/`DELETE` `app/api/transacoes/[id]/route.ts` + checagem tipo × categoria
-- [ ] T018 [P] [US2] [Nakashima] `components/transacao-form.tsx` (React Hook Form + Zod)
-- [ ] T019 [US2] [Nakashima] Página `app/(dashboard)/transacoes/page.tsx` (tabela paginada + confirmação de exclusão)
+- [ ] T016 [US2] [João] `GET` (paginação) / `POST` em `backend/app/api/v1/endpoints/transacoes.py`
+- [ ] T017 [US2] [João] `PATCH`/`DELETE` em `transacoes.py` + checagem tipo × categoria
+- [ ] T018 [P] [US2] [Nakashima] `Front-end/src/components/transacao-form.tsx` (React Hook Form + Zod)
+- [ ] T019 [US2] [Nakashima] Página de transações (tabela paginada + confirmação de exclusão)
 - [ ] T020 [US2] [Natalia] Integrar form/lista com API; estados loading/erro; conferir pt-BR
 
 **Checkpoint**: histórico funciona mesmo com resumo ainda mockado
@@ -88,8 +88,8 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Independent Test**: lançar no mês atual e ver totais em R$
 
-- [ ] T021 [US3] [João] `GET app/api/relatorios/resumo/route.ts` (agrega por `data`)
-- [ ] T022 [P] [US3] [Taxiotti] `components/resumo-cards.tsx` + `app/(dashboard)/page.tsx` (estado vazio = R$ 0,00; saldo negativo destacado)
+- [ ] T021 [US3] [João] `GET /api/relatorios/resumo` em `backend/app/api/v1/endpoints/relatorios.py` (agrega por `data`)
+- [ ] T022 [P] [US3] [Taxiotti] `Front-end/src/components/resumo-cards.tsx` + home (estado vazio = R$ 0,00; saldo negativo destacado)
 - [ ] T023 [US3] [Natalia] Integrar cards com `/api/relatorios/resumo`; conferir SC-004 vs soma manual
 
 **Checkpoint**: MVP demonstrável (US1+US2+US3)
@@ -103,7 +103,7 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 **Independent Test**: combinar filtros e limpar
 
 - [ ] T024 [US4] [João] Query params `from`, `to`, `tipo`, `categoriaId`, `minValor`, `maxValor` em `GET /api/transacoes`
-- [ ] T025 [P] [US4] [Nakashima] `components/transacao-filtros.tsx` na listagem + botão limpar
+- [ ] T025 [P] [US4] [Nakashima] `Front-end/src/components/transacao-filtros.tsx` na listagem + botão limpar
 - [ ] T026 [US4] [Natalia] Ligar querystring da UI à API; paginação preserva filtros
 
 **Checkpoint**: lista filtrada consistente após F5
@@ -116,11 +116,11 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Independent Test**: dois meses / duas categorias; totais = API
 
-- [ ] T027 [US5] [João] `GET app/api/relatorios/pizza/route.ts`
-- [ ] T028 [P] [US5] [João] `GET app/api/relatorios/evolucao/route.ts` e `comparativo/route.ts`
-- [ ] T029 [P] [US5] [Taxiotti] `components/grafico-pizza.tsx` + tabela/ARIA equivalente
-- [ ] T030 [P] [US5] [Taxiotti] `components/grafico-linha.tsx`
-- [ ] T031 [US5] [Taxiotti] `components/comparativo-mes.tsx` + `app/(dashboard)/relatorios/page.tsx`
+- [ ] T027 [US5] [João] `GET /api/relatorios/pizza` em `relatorios.py`
+- [ ] T028 [P] [US5] [João] `GET /api/relatorios/evolucao` e `/comparativo` em `relatorios.py`
+- [ ] T029 [P] [US5] [Taxiotti] `Front-end/src/components/grafico-pizza.tsx` + tabela/ARIA equivalente
+- [ ] T030 [P] [US5] [Taxiotti] `Front-end/src/components/grafico-linha.tsx`
+- [ ] T031 [US5] [Taxiotti] `Front-end/src/components/comparativo-mes.tsx` + página Relatórios
 - [ ] T032 [US5] [Taxiotti] Ajustes de responsividade (375px e 1280px) em dashboard, gráficos e tabelas
 - [ ] T033 [US5] [Natalia] Integrar Relatórios às 3 APIs; empty state; conferir totais
 
@@ -134,9 +134,9 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Independent Test**: dois usuários sem vazamento de dados
 
-- [ ] T034 [US6] [João] Garantir `Usuario` + `usuarioId` em Categoria/Transacao, migration e seed por usuário
-- [ ] T035 [US6] [Duda] `lib/auth.ts` + `app/api/auth/[...nextauth]/route.ts` (Credentials + bcrypt)
-- [ ] T036 [P] [US6] [Duda] Páginas `app/(auth)/login/page.tsx` e `register/page.tsx`
+- [ ] T034 [US6] [João] Garantir `Usuario` + `usuario_id` em Categoria/Transacao e seed por usuário
+- [ ] T035 [US6] [Duda] JWT + bcrypt em `backend/app/core/security.py` e `backend/app/api/v1/endpoints/auth.py`
+- [ ] T036 [P] [US6] [Duda] Páginas de login e cadastro no `Front-end`
 - [ ] T037 [US6] [Duda] Middleware de rotas, sessão persistente, logout
 - [ ] T038 [US6] [Duda] Isolamento: toda query/API usa `usuarioId` da sessão (401/403 sem sessão)
 - [ ] T039 [US6] [Natalia] Integrar auth ao dashboard, redirects e erros; QA com duas contas
@@ -152,7 +152,7 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 **Independent Test**: filtrar, baixar, abrir no Excel
 
 - [ ] T040 [US7] [João] (se combinado) dados para export no servidor — ou Duda usa a mesma query
-- [ ] T041 [US7] [Duda] `GET app/api/transacoes/export/route.ts` (`text/csv`) + botão na listagem
+- [ ] T041 [US7] [Duda] Completar `GET /api/transacoes/export` em `transacoes.py` (`text/csv`) + botão na listagem
 - [ ] T042 [US7] [Natalia] QA: filtros da tela = linhas do arquivo; cabeçalho ok
 
 **Checkpoint**: extra do roadmap (CSV) entregue; PDF continua fora
@@ -219,7 +219,7 @@ Depois de categorias:
 
 ### MVP First (US1–US3)
 
-1. Phase 1 Natalia
+1. Phase 1 Natalia (Vite + URL da API; backend já esboçado)
 2. Phase 2 João + Nakashima
 3. US1 → US2 → US3
 4. **STOP**: demo do resumo mensal

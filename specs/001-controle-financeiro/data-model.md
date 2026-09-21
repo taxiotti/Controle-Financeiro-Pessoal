@@ -69,6 +69,6 @@ Delete: usuário em cascata (quando existir). Categoria: Restrict se houver tran
 - `Categoria(usuarioId, nome)` único
 - `Usuario(email)` único
 
-## Prisma (esboço)
+## SQLAlchemy (esboço)
 
-João implementa em `prisma/schema.prisma`. Campos em camelCase no Prisma; JSON da API em camelCase (igual ao contrato).
+João implementa em `backend/app/models/`. Colunas no banco em `snake_case` (`usuario_id`, `senha_hash`). JSON da API em **camelCase** (igual ao contrato: `categoriaId`, `pageSize`). Usar `Numeric(12, 2)` para valor; serializar na API como string (`"150.90"`).

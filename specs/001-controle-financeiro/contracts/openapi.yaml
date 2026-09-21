@@ -4,7 +4,8 @@ info:
   version: 0.1.0
   description: Contrato compartilhado. Mudanças de campo exigem atualizar este arquivo no mesmo PR.
 servers:
-  - url: /api
+  - url: http://localhost:8000/api
+    description: FastAPI local (backend/)
 tags:
   - name: Categorias
   - name: Transacoes
@@ -332,7 +333,7 @@ paths:
   /auth/register:
     post:
       tags: [Auth]
-      description: Implementação via Auth.js; este path é o contrato lógico da Duda (pode ser Server Action).
+      description: Registro no FastAPI (`POST /api/auth/register`). Duda implementa JWT nas demais rotas de sessão.
       requestBody:
         required: true
         content:
