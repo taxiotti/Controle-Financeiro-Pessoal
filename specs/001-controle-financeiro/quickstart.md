@@ -1,31 +1,43 @@
 # Quickstart — Controle Financeiro Pessoal
 
-Para o grupo subir o app depois do setup (Natalia) e do schema (João).
+Dois processos: API (8000) e UI (5173).
 
 ## Pré-requisitos
 
+- Python 3.12
 - Node.js 20 LTS
-- npm
 - Git
 
-## Primeira vez
+## Backend (FastAPI)
 
 ```bash
-npm install
+cd backend
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
 copy .env.example .env
-npx prisma migrate dev
-npx prisma db seed
-npm run dev
+python -m app.seed
+uvicorn app.main:app --reload --port 8000
 ```
 
-Abra `http://localhost:3000`.
+- API: http://localhost:8000
+- Swagger: http://localhost:8000/docs
+
+## Front-end (Vite)
+
+```bash
+cd Front-end
+npm install
+```
+
+Crie `Front-end/.env` com `VITE_API_URL=http://localhost:8000/api` e rode `npm run dev`. Abra http://localhost:5173.
 
 ## Usuário de desenvolvimento (após seed)
 
 - E-mail: `dev@local.test`
-- Senha: ver `.env.example` (`DEV_USER_PASSWORD`)
+- Senha: ver `backend/.env.example` (`DEV_USER_PASSWORD`)
 
-Antes da US6, o app pode operar só com esse usuário implícito.
+Antes da US6, a API pode operar só com esse usuário implícito.
 
 ## Rotas da UI
 
@@ -39,16 +51,16 @@ Antes da US6, o app pode operar só com esse usuário implícito.
 
 ## Ordem segura de desenvolvimento
 
-1. Natalia: `create-next-app`, Tailwind, shadcn, Spec Kit já existente.
-2. João: Prisma + seed + `GET/POST /api/categorias`.
-3. Nakashima: UI categorias contra a API (ou mock no formato do contrato).
+1. Natalia: Vite + `VITE_API_URL` + CORS conferido no FastAPI.
+2. João: models + seed + `GET/POST /api/categorias`.
+3. Nakashima: UI categorias contra a API (ou mock do contrato).
 4. João: CRUD transações + resumo.
-5. Nakashima + Taxiotti em paralelo (forms vs cards).
-6. Natalia liga telas ↔ APIs e trata erros.
+5. Nakashima + Taxiotti em paralelo.
+6. Natalia liga telas ↔ APIs.
 7. João: filtros + relatórios JSON.
 8. Taxiotti: gráficos. Natalia integra.
-9. João: `usuarios` + FK. Duda: Auth.js + middleware + isolamento.
-10. Duda: CSV. Natalia: QA dos fluxos.
+9. João: FK usuário. Duda: JWT + telas + isolamento.
+10. Duda: CSV. Natalia: QA.
 
 ## Conferência rápida do MVP (P1)
 

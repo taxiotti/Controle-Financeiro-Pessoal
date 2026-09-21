@@ -1,50 +1,46 @@
 # Research: Controle Financeiro Pessoal
 
-**Date**: 2026-09-14
+**Date**: 2026-09-18
 
-## 1. Next.js único vs React + Express
+## 1. SPA Vite + API FastAPI (emenda 2026-09-18)
 
-**Decision**: Next.js App Router full-stack neste repositório.
+**Decision**: `Front-end/` (React + Vite) e `backend/` (Python + FastAPI).
 
-**Rationale**: o grupo já desenhou pastas `app/`, `api/` e o setup da Natalia cita Next.js + Tailwind + shadcn. Evita dois deploys e duplicação de tipos.
+**Rationale**: o frontend do grupo já está em Vite. O backend será Python para João trabalhar a API com FastAPI, independente da UI.
 
-**Rejected**: React+Vite+Express — mais arquivos e contrato HTTP extra sem ganho para 5 pessoas.
+**Rejected**: Next.js monolito da spec v1 — não reflete o `Front-end/` existente nem FastAPI.
 
-## 2. Prisma + SQLite (dev)
+## 2. SQLAlchemy 2 + SQLite (sem migrations)
 
-**Decision**: Prisma ORM; `datasource` SQLite no `.env` local. Modelos com `String` UUID (`@id @default(uuid())`) e `Decimal` para valores.
+**Decision**: ORM SQLAlchemy 2; SQLite no `.env` local. Tabelas criadas com `Base.metadata.create_all` na subida da API. UUID como string; `Numeric(12, 2)` para dinheiro.
 
-**Rationale**: João precisa de migrations visíveis. SQLite zera atrito (sem Docker obrigatório). Decimal evita erro de float em dinheiro.
+**Rationale**: o grupo não vai manter histórico de schema com Alembic. `create_all` basta para o trabalho acadêmico.
 
-**Rejected**: Drizzle nesta v1 (o grupo mencionou Prisma nas tarefas do João com mais frequência). Troca depois exigiria reescrever tasks.
+**Rejected**: Alembic (overhead de migrations neste projeto); Prisma Python.
 
-## 3. Auth.js (NextAuth) + credentials
+## 3. JWT no FastAPI + bcrypt
 
-**Decision**: Auth.js no App Router, provider Credentials, senha com bcrypt. Sessão JWT (strategy jwt) para simplicidade em SQLite.
+**Decision**: `passlib`/`bcrypt` + JWT (`python-jose`). Telas de login continuam no Vite (Duda).
 
-**Rationale**: bate com a demanda da Duda (login/registro, middleware, isolamento). Sem OAuth nesta versão.
+**Rationale**: auth vive na API. Frontend guarda token e manda `Authorization`. Sem OAuth nesta versão.
 
-**Rejected**: auth só no client; NextAuth OAuth-only (Google) — foge do cadastro e-mail/senha da spec.
+**Rejected**: Auth.js/NextAuth (depende de Next.js).
 
 ## 4. Momento da autenticação
 
-**Decision**: schema já nasce com `usuarioId` opcional OU seed de um usuário de desenvolvimento. Rotas P1/P2 podem usar um `DEV_USER_ID` até a US6; depois o middleware torna `usuarioId` obrigatório.
+**Decision**: schema já nasce com `usuario_id` opcional + seed `dev@local.test`. Rotas P1/P2 podem usar esse usuário até a US6.
 
-**Rationale**: constituição exige MVP sem auth. João modela `usuarios` cedo (tarefa dele) para não refazer FK.
-
-**Implementation note**: documentar no `quickstart.md` o usuário seed (`dev@local.test`).
+**Rationale**: constituição exige MVP sem auth. João modela `usuarios` cedo para não refazer FK.
 
 ## 5. Gráficos
 
-**Decision**: Recharts. Agregação sempre no servidor (endpoints `/api/relatorios/*`). Componentes do Taxiotti só recebem JSON já somado.
-
-**Rationale**: totais não podem depender da página atual da lista. Acessibilidade: cada gráfico acompanha tabela resumida.
+**Decision**: Recharts. Agregação no servidor (`/api/relatorios/*`). Taxiotti só consome JSON.
 
 ## 6. Estado no cliente
 
-**Decision**: TanStack Query para GET/mutações; React Hook Form + Zod no cliente, **mesmo schema Zod** (ou equivalente) reutilizado em `lib/validations.ts` nas Route Handlers.
+**Decision**: TanStack Query; React Hook Form + Zod no cliente; Pydantic nas Route handlers FastAPI, espelhando `openapi.yaml`.
 
-## 7. Fora de escopo (não pesquisar implementação agora)
+## 7. Fora de escopo
 
 Recorrência automática, PDF, PWA, push/e-mail, Open Finance, tema dark como aceite.
 
@@ -52,8 +48,8 @@ Recorrência automática, PDF, PWA, push/e-mail, Open Finance, tema dark como ac
 
 | Área | Dono | Não faz |
 |---|---|---|
-| Prisma, rotas API, queries | João | CSS/layout de páginas |
-| shadcn, forms, tabelas, filtros UI | Nakashima | SQL/Prisma |
+| SQLAlchemy, rotas FastAPI, queries | João | CSS/layout de páginas |
+| shadcn, forms, tabelas, filtros UI | Nakashima | SQL |
 | Dashboard, Recharts, responsivo visual | Taxiotti | endpoints |
-| NextAuth, middleware, CSV | Duda | CRUD de categoria/transação |
-| create-next-app, wiring, QA | Natalia | reimplementar o que o dono já fez |
+| JWT, telas login, CSV | Duda | CRUD de categoria/transação |
+| Vite, CORS/`VITE_API_URL`, wiring, QA | Natalia | reimplementar o que o dono já fez |
