@@ -26,7 +26,7 @@ export function DashboardLayout() {
         <div className="brand-row">
           <Link className="brand" to="/" onClick={() => setMenuOpen(false)}>
             <span className="brand-mark"><WalletCards size={18} /></span>
-            <span>Clarus</span>
+            <span>Daniel Bank</span>
           </Link>
           <button className="mobile-close icon-button" type="button" onClick={() => setMenuOpen(false)} aria-label="Fechar menu"><X /></button>
         </div>
@@ -49,7 +49,7 @@ export function DashboardLayout() {
           <strong>Modo local</strong>
           <span>Seus dados ficam somente neste dispositivo.</span>
         </div>
-        <span className="version">Clarus · Front-end SDD</span>
+        <span className="version">Daniel Bank · Front-end SDD</span>
       </aside>
 
       {menuOpen && <button className="sidebar-scrim" type="button" onClick={() => setMenuOpen(false)} aria-label="Fechar menu" />}
