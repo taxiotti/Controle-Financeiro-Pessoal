@@ -4,9 +4,9 @@ Como usar: cada integrante pega as tasks com o seu nome em [tasks.md](./tasks.md
 
 | Integrante | Papel | Demandas | Carga | Complexidade | Status |
 |---|---|---|---|---|---|
-| **João** | Backend & banco | Modelagem SQLAlchemy (`transacoes`/`categorias`) | Média | Alta | A fazer |
-| **João** | Backend & banco | Endpoints CRUD de categorias | Baixa | Média | A fazer |
-| **João** | Backend & banco | Endpoints CRUD de transações | Média | Média | A fazer |
+| **João** | Backend & banco | Modelagem SQLAlchemy (`transacoes`/`categorias`) | Média | Alta | Concluída |
+| **João** | Backend & banco | Endpoints CRUD de categorias | Baixa | Média | Concluída |
+| **João** | Backend & banco | Endpoints CRUD de transações | Média | Média | Concluída |
 | **João** | Backend & banco | Agregações (resumo + gráficos) | Média | Alta | A fazer |
 | **João** | Backend & banco | Filtros no backend (período, tipo, categoria, valor) | Média | Média | A fazer |
 | **João** | Backend & banco | Tabela `usuarios` e vínculo com transações/categorias | Baixa | Média | A fazer |

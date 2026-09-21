@@ -39,9 +39,9 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **⚠️ CRITICAL**: histórias de produto só depois desta fase
 
-- [ ] T005 [João] Completar models SQLAlchemy em `backend/app/models/` e índices de `data-model.md` (tabelas via `create_all` na subida da API; sem migrations)
-- [ ] T006 [João] Implementar `backend/app/seed.py` (usuário `dev@local.test` + categorias padrão)
-- [ ] T007 [P] [João] Completar schemas Pydantic em `backend/app/schemas/` alinhados a `contracts/openapi.yaml`
+- [x] T005 [João] Completar models SQLAlchemy em `backend/app/models/` e índices de `data-model.md` (tabelas via `create_all` na subida da API; sem migrations)
+- [x] T006 [João] Implementar `backend/app/seed.py` (usuário `dev@local.test` + categorias padrão)
+- [x] T007 [P] [João] Completar schemas Pydantic em `backend/app/schemas/` alinhados a `contracts/openapi.yaml`
 - [ ] T008 [P] [Nakashima] Instalar componentes shadcn (Button, Input, Label, Dialog, Table, Select, Card, Alert) em `Front-end/src/components/ui/`
 - [ ] T009 [Nakashima] Layout/nav do dashboard no Front-end (Início, Transações, Categorias, Relatórios)
 - [ ] T010 [P] [Natalia] `Front-end/src/lib/utils.ts` (`formatMoney`, `formatDate`) e `api-client.ts` (`VITE_API_URL`)
@@ -56,8 +56,8 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Independent Test**: criar/editar categoria e recarregar a página
 
-- [ ] T011 [US1] [João] `GET`/`POST` em `backend/app/api/v1/endpoints/categorias.py`
-- [ ] T012 [US1] [João] `PATCH`/`DELETE` em `categorias.py` (409 se padrão ou em uso)
+- [x] T011 [US1] [João] `GET`/`POST` em `backend/app/api/v1/endpoints/categorias.py`
+- [x] T012 [US1] [João] `PATCH`/`DELETE` em `categorias.py` (409 se padrão ou em uso)
 - [ ] T013 [P] [US1] [Nakashima] `Front-end/src/components/categoria-form.tsx` (modal, cor, ícone, validação)
 - [ ] T014 [US1] [Nakashima] Página de categorias no Front-end (tabela + ações)
 - [ ] T015 [US1] [Natalia] Ligar a página às APIs, toasts de erro/sucesso, conferir seed padrão
@@ -72,8 +72,8 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Independent Test**: criar receita e despesa, editar, excluir com confirmação
 
-- [ ] T016 [US2] [João] `GET` (paginação) / `POST` em `backend/app/api/v1/endpoints/transacoes.py`
-- [ ] T017 [US2] [João] `PATCH`/`DELETE` em `transacoes.py` + checagem tipo × categoria
+- [x] T016 [US2] [João] `GET` (paginação) / `POST` em `backend/app/api/v1/endpoints/transacoes.py`
+- [x] T017 [US2] [João] `PATCH`/`DELETE` em `transacoes.py` + checagem tipo × categoria
 - [ ] T018 [P] [US2] [Nakashima] `Front-end/src/components/transacao-form.tsx` (React Hook Form + Zod)
 - [ ] T019 [US2] [Nakashima] Página de transações (tabela paginada + confirmação de exclusão)
 - [ ] T020 [US2] [Natalia] Integrar form/lista com API; estados loading/erro; conferir pt-BR
