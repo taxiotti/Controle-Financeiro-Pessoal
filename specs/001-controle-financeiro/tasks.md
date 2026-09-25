@@ -88,7 +88,7 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Independent Test**: lançar no mês atual e ver totais em R$
 
-- [ ] T021 [US3] [João] FastAPI `GET /relatorios/resumo` (agrega por `data`)
+- [x] T021 [US3] [João] FastAPI `GET /relatorios/resumo` (agrega por `data`)
 - [x] T022 [P] [US3] [Taxiotti] Cards e dashboard em `Front-end/src/pages/DashboardPage.tsx` (estado vazio = R$ 0,00; saldo negativo destacado)
 - [x] T023 [US3] [Natalia] Integrar cards ao adapter local; conferir SC-004 vs soma manual
 
@@ -116,8 +116,8 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Independent Test**: dois meses / duas categorias; totais = API
 
-- [ ] T027 [US5] [João] FastAPI `GET /relatorios/pizza`
-- [ ] T028 [P] [US5] [João] FastAPI `GET /relatorios/evolucao` e `/relatorios/comparativo`
+- [x] T027 [US5] [João] FastAPI `GET /relatorios/pizza`
+- [x] T028 [P] [US5] [João] FastAPI `GET /relatorios/evolucao` e `/relatorios/comparativo`
 - [x] T029 [P] [US5] [Taxiotti] Gráfico de pizza + tabela equivalente
 - [x] T030 [P] [US5] [Taxiotti] Gráfico de linha + tabela equivalente
 - [x] T031 [US5] [Taxiotti] Comparativo e página `/relatorios`
