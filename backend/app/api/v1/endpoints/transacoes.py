@@ -1,13 +1,14 @@
-
 from typing import Annotated
 from uuid import UUID
 
+import csv
+import io
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.api.v1.endpoints.categorias import get_usuario_atual
 from app.core.database import get_db
+from app.core.security import get_usuario_atual
 from app.models import Categoria, Transacao, Usuario
 from app.schemas.categoria import CategoriaResponse
 from app.schemas.transacao import PaginaTransacoes, TransacaoInput, TransacaoResponse
@@ -42,6 +43,15 @@ def buscar_transacao(db: Session, id: UUID, usuario: Usuario) -> Transacao:
     return transacao
 
 
+def listar_transacoes_usuario(usuario: Usuario):
+    return (
+        select(Transacao, Categoria)
+        .join(Categoria, Categoria.id == Transacao.categoria_id)
+        .where(Transacao.usuario_id == usuario.id)
+        .order_by(Transacao.data.desc(), Transacao.criado_em.desc(), Transacao.id)
+    )
+
+
 def para_resposta(
     transacao: Transacao,
     categoria: Categoria,
@@ -67,18 +77,38 @@ def listar(
     base = select(Transacao).where(Transacao.usuario_id == usuario.id)
     total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
     rows = db.execute(
-        select(Transacao, Categoria)
-        .join(Categoria, Categoria.id == Transacao.categoria_id)
-        .where(Transacao.usuario_id == usuario.id)
-        .order_by(Transacao.data.desc(), Transacao.criado_em.desc(), Transacao.id)
-        .offset((page - 1) * page_size)
-        .limit(page_size)
+        listar_transacoes_usuario(usuario).offset((page - 1) * page_size).limit(page_size)
     ).all()
     return PaginaTransacoes(
         items=[para_resposta(transacao, categoria) for transacao, categoria in rows],
         total=total,
         page=page,
         page_size=page_size,
+    )
+
+
+@router.get("/export")
+def exportar(
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_usuario_atual),
+):
+    rows = db.execute(listar_transacoes_usuario(usuario)).all()
+    buffer = io.StringIO()
+    buffer.write("\ufeff")
+    writer = csv.writer(buffer, delimiter=";", lineterminator="\r\n")
+    writer.writerow(["Data", "Tipo", "Descrição", "Valor", "Categoria"])
+    for transacao, categoria in rows:
+        writer.writerow([
+            transacao.data.strftime("%d/%m/%Y"),
+            transacao.tipo,
+            transacao.descricao,
+            f"{transacao.valor:.2f}".replace(".", ","),
+            categoria.nome,
+        ])
+    return Response(
+        content=buffer.getvalue().encode("utf-8"),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="transacoes.csv"'},
     )
 
 
