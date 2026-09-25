@@ -135,10 +135,10 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 **Independent Test**: dois usuários sem vazamento de dados
 
 - [ ] T034 [US6] [João] Garantir `Usuario` + `usuarioId` em Categoria/Transacao, migration e seed por usuário
-- [ ] T035 [US6] [Duda] Implementar autenticação no FastAPI com credenciais e hash seguro
-- [ ] T036 [P] [US6] [Duda] Páginas `/login` e `/register` no Front-end
-- [ ] T037 [US6] [Duda] Proteção de rotas, sessão persistente e logout
-- [ ] T038 [US6] [Duda] Isolamento: toda query/API usa `usuarioId` da sessão (401/403 sem sessão)
+- [x] T035 [US6] [Duda] Implementar autenticação FastAPI com credenciais, JWT e hash seguro
+- [x] T036 [P] [US6] [Duda] Páginas `/login` e `/register` no Front-end
+- [x] T037 [US6] [Duda] Proteção de rotas, sessão persistente e logout
+- [x] T038 [US6] [Duda] Isolamento: toda query/API usa `usuarioId` da sessão (401/403 sem sessão)
 - [ ] T039 [US6] [Natalia] Integrar auth ao dashboard, redirects e erros; QA com duas contas
 
 **Checkpoint**: visitante não entra no dashboard; A não vê dados de B

@@ -14,6 +14,11 @@ tags:
   - name: Auth
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     Error:
       type: object
@@ -103,12 +108,40 @@ components:
         variacaoReceitas: { type: string }
         variacaoDespesas: { type: string }
         variacaoSaldo: { type: string }
+    UsuarioPublico:
+      type: object
+      required: [id, nome, email]
+      properties:
+        id: { type: string, format: uuid }
+        nome: { type: string }
+        email: { type: string, format: email }
+    RegistroInput:
+      type: object
+      required: [nome, email, senha]
+      properties:
+        nome: { type: string, minLength: 2, maxLength: 80 }
+        email: { type: string, format: email }
+        senha: { type: string, minLength: 8, maxLength: 128 }
+    LoginInput:
+      type: object
+      required: [email, senha]
+      properties:
+        email: { type: string, format: email }
+        senha: { type: string }
+    Sessao:
+      type: object
+      required: [accessToken, tokenType, usuario]
+      properties:
+        accessToken: { type: string }
+        tokenType: { type: string, example: bearer }
+        usuario: { $ref: "#/components/schemas/UsuarioPublico" }
 
 paths:
   /categorias:
     get:
       tags: [Categorias]
       summary: Lista categorias do usuário
+      security: [{ bearerAuth: [] }]
       responses:
         "200":
           description: OK
@@ -117,9 +150,15 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/Categoria" }
+        "401":
+          description: Sessão ausente ou inválida.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
     post:
       tags: [Categorias]
       summary: Cria categoria customizada
+      security: [{ bearerAuth: [] }]
       requestBody:
         required: true
         content:
@@ -136,9 +175,15 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
+        "401":
+          description: Sessão ausente ou inválida.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
   /categorias/{id}:
     patch:
       tags: [Categorias]
+      security: [{ bearerAuth: [] }]
       parameters:
         - in: path
           name: id
@@ -154,9 +199,15 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Categoria" }
+        "401":
+          description: Sessão ausente ou inválida.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
         "404": { description: Não encontrada }
     delete:
       tags: [Categorias]
+      security: [{ bearerAuth: [] }]
       parameters:
         - in: path
           name: id
@@ -164,6 +215,11 @@ paths:
           schema: { type: string, format: uuid }
       responses:
         "204": { description: Removida }
+        "401":
+          description: Sessão ausente ou inválida.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
         "409":
           description: Padrão ou em uso
           content:
@@ -173,6 +229,7 @@ paths:
     get:
       tags: [Transacoes]
       summary: Lista paginada de transações
+      security: [{ bearerAuth: [] }]
       parameters:
         - in: query
           name: page
@@ -191,13 +248,14 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
-        "503":
-          description: Usuário de desenvolvimento ausente; executar seed (antes da US6).
+        "401":
+          description: Sessão ausente ou inválida.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
     post:
       tags: [Transacoes]
+      security: [{ bearerAuth: [] }]
       requestBody:
         required: true
         content:
@@ -210,14 +268,15 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Transacao" }
         "400": { description: Validação }
-        "503":
-          description: Usuário de desenvolvimento ausente; executar seed (antes da US6).
+        "401":
+          description: Sessão ausente ou inválida.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
   /transacoes/{id}:
     patch:
       tags: [Transacoes]
+      security: [{ bearerAuth: [] }]
       parameters:
         - in: path
           name: id
@@ -239,18 +298,19 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
+        "401":
+          description: Sessão ausente ou inválida.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
         "404":
           description: Transação inexistente ou pertencente a outro usuário.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
-        "503":
-          description: Usuário de desenvolvimento ausente; executar seed (antes da US6).
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/Error" }
     delete:
       tags: [Transacoes]
+      security: [{ bearerAuth: [] }]
       parameters:
         - in: path
           name: id
@@ -263,19 +323,20 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
-        "404":
-          description: Transação inexistente ou pertencente a outro usuário.
+        "401":
+          description: Sessão ausente ou inválida.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
-        "503":
-          description: Usuário de desenvolvimento ausente; executar seed (antes da US6).
+        "404":
+          description: Transação inexistente ou pertencente a outro usuário.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
   /relatorios/resumo:
     get:
       tags: [Relatorios]
+      security: [{ bearerAuth: [] }]
       parameters:
         - in: query
           name: ano
@@ -291,9 +352,15 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ResumoMensal" }
+        "401":
+          description: Sessão ausente ou inválida.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
   /relatorios/pizza:
     get:
       tags: [Relatorios]
+      security: [{ bearerAuth: [] }]
       parameters:
         - in: query
           name: ano
@@ -314,9 +381,15 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/FatiaPizza" }
+        "401":
+          description: Sessão ausente ou inválida.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
   /relatorios/evolucao:
     get:
       tags: [Relatorios]
+      security: [{ bearerAuth: [] }]
       parameters:
         - in: query
           name: meses
@@ -329,9 +402,15 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/PontoEvolucao" }
+        "401":
+          description: Sessão ausente ou inválida.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
   /relatorios/comparativo:
     get:
       tags: [Relatorios]
+      security: [{ bearerAuth: [] }]
       parameters:
         - in: query
           name: ano
@@ -347,31 +426,94 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Comparativo" }
+        "401":
+          description: Sessão ausente ou inválida.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
   /transacoes/export:
     get:
       tags: [Exportacao]
       summary: CSV da listagem (mesmos filtros de GET /transacoes)
+      security: [{ bearerAuth: [] }]
       responses:
         "200":
           description: text/csv
           content:
             text/csv:
               schema: { type: string }
+        "401":
+          description: Sessão ausente ou inválida.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
   /auth/register:
     post:
       tags: [Auth]
-      description: Registro no FastAPI (`POST /api/auth/register`). Duda implementa JWT nas demais rotas de sessão.
+      description: Registro no FastAPI (`POST /api/auth/register`). Cria a conta, categorias padrão e inicia a sessão JWT.
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              type: object
-              required: [nome, email, senha]
-              properties:
-                nome: { type: string }
-                email: { type: string, format: email }
-                senha: { type: string, minLength: 8 }
+            schema: { $ref: "#/components/schemas/RegistroInput" }
       responses:
-        "201": { description: Conta criada }
-        "409": { description: E-mail já existe }
+        "201":
+          description: Conta criada e sessão iniciada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Sessao" }
+        "400":
+          description: Validação
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: E-mail já existe
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /auth/login:
+    post:
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginInput" }
+      responses:
+        "200":
+          description: Sessão iniciada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Sessao" }
+        "401":
+          description: E-mail ou senha inválidos
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /auth/logout:
+    post:
+      tags: [Auth]
+      security: [{ bearerAuth: [] }]
+      responses:
+        "204": { description: Sessão encerrada no cliente }
+        "401":
+          description: Sessão ausente ou inválida
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /auth/me:
+    get:
+      tags: [Auth]
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Usuário da sessão
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UsuarioPublico" }
+        "401":
+          description: Sessão ausente ou inválida
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
