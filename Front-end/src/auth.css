@@ -12,4 +12,5 @@
 .auth-form .submit-button:disabled { opacity: .7; cursor: wait; }
 .auth-switch { margin-top: 22px; color: #738079; font-size: 13px; text-align: center; }
 .auth-switch a { color: #237b59; font-weight: 700; }
+.page-actions { display: flex; gap: 8px; }
 @media (max-width: 640px) { .auth-page { padding: 16px; }.auth-card { padding: 26px 20px; }.export-button { padding: 8px; font-size: 10px; } }

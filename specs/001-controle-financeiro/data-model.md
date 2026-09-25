@@ -69,6 +69,11 @@ Delete: usuário em cascata (quando existir). Categoria: Restrict se houver tran
 - `Categoria(usuarioId, nome)` único
 - `Usuario(email)` único
 
-## SQLAlchemy (esboço)
+## Persistência FastAPI (direção)
 
-João implementa em `backend/app/models/`. Colunas no banco em `snake_case` (`usuario_id`, `senha_hash`). JSON da API em **camelCase** (igual ao contrato: `categoriaId`, `pageSize`). Usar `Numeric(12, 2)` para valor; serializar na API como string (`"150.90"`).
+João implementará os modelos com SQLAlchemy ou SQLModel no futuro serviço
+FastAPI. Valores financeiros usam `Decimal`, nunca `float`. Os schemas
+Pydantic e o JSON da API mantêm camelCase e os formatos definidos no contrato.
+
+Enquanto o backend não existe, o adapter do Front-end persiste a mesma forma
+JSON em `localStorage`, com versão de schema e valores decimais como string.

@@ -195,10 +195,11 @@ Como usuário autenticado, quero baixar a listagem (respeitando filtros ativos) 
 ## Assumptions
 
 - Público: estudantes/grupo acadêmico e uso pessoal, não banco comercial.
-- v1 usa dois serviços: `Front-end/` (React + Vite) e `backend/` (Python + FastAPI).
-- Desenvolvimento usa SQLite; SQLAlchemy cria as tabelas na subida da API (sem migrations).
-- Auth JWT no FastAPI com e-mail/senha e hash bcrypt; sem OAuth nesta versão.
-- Gráficos: Recharts. Formulários: React Hook Form + Zod. UI: Tailwind + shadcn/ui. API: Pydantic.
+- v1 usa React + TypeScript + Vite em `Front-end/` e uma API FastAPI separada quando o backend for iniciado.
+- Até a API FastAPI existir, US1–US5 operam por um adapter local versionado que preserva os formatos do contrato OpenAPI.
+- O backend futuro usa SQLite em desenvolvimento e deve permitir migração para PostgreSQL.
+- Autenticação será definida no FastAPI com credenciais (e-mail/senha) e hash seguro; sem OAuth nesta versão.
+- Gráficos: Recharts. Formulários: React Hook Form + Zod. UI: CSS próprio responsivo.
 - Recorrência: o campo `recorrente` NÃO faz parte do MVP (pode existir no banco como `false` fixo, sem UI).
 - Tema claro/escuro é desejável, mas não bloqueia aceite das histórias P1–P4.
 - Sem multi-moeda (apenas BRL).
