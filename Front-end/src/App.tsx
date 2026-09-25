@@ -1,5 +1,51 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import type { FormEvent } from 'react'
 import './App.css'
+import './auth.css'
+import { ApiError, api } from './lib/api-client'
+import { clearSessao, getToken, getUsuario, setSessao } from './lib/session'
+
+type AuthMode = 'login' | 'register'
+
+function AuthPage({ mode, onAuthenticated }: { mode: AuthMode; onAuthenticated: () => void }) {
+  const [nome, setNome] = useState('')
+  const [email, setEmail] = useState('')
+  const [senha, setSenha] = useState('')
+  const [erro, setErro] = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const cadastro = mode === 'register'
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setErro('')
+    setEnviando(true)
+    try {
+      const sessao = cadastro ? await api.register(nome, email, senha) : await api.login(email, senha)
+      setSessao(sessao.accessToken, sessao.usuario)
+      window.history.replaceState(null, '', '/')
+      onAuthenticated()
+    } catch (error) {
+      setErro(error instanceof ApiError ? error.message : 'Não foi possível entrar. Tente novamente.')
+    } finally {
+      setEnviando(false)
+    }
+  }
+
+  return <main className="auth-page"><section className="auth-card" aria-labelledby="auth-title">
+    <div className="brand auth-brand"><span className="brand-mark">$</span><span>clarus</span></div>
+    <p className="eyebrow">CONTROLE FINANCEIRO PESSOAL</p>
+    <h1 id="auth-title">{cadastro ? 'Crie sua conta' : 'Entre na sua conta'}</h1>
+    <p className="auth-subtitle">{cadastro ? 'Comece a organizar sua vida financeira.' : 'Acesse seus dados financeiros com segurança.'}</p>
+    <form className="auth-form" onSubmit={submit}>
+      {cadastro && <label>Nome<input required minLength={2} maxLength={80} value={nome} onChange={(event) => setNome(event.target.value)} autoComplete="name" /></label>}
+      <label>E-mail<input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" /></label>
+      <label>Senha<input required type="password" minLength={cadastro ? 8 : 1} maxLength={128} value={senha} onChange={(event) => setSenha(event.target.value)} autoComplete={cadastro ? 'new-password' : 'current-password'} /></label>
+      {erro && <p className="auth-error" role="alert">{erro}</p>}
+      <button className="submit-button" disabled={enviando} type="submit">{enviando ? 'Aguarde...' : cadastro ? 'Criar conta' : 'Entrar'}</button>
+    </form>
+    <p className="auth-switch">{cadastro ? 'Já possui uma conta?' : 'Ainda não possui uma conta?'} <a href={cadastro ? '/login' : '/register'}>{cadastro ? 'Entrar' : 'Cadastre-se'}</a></p>
+  </section></main>
+}
 
 type Transaction = {
   name: string
@@ -17,7 +63,7 @@ const initialTransactions: Transaction[] = [
   { name: 'Uber', category: 'Transporte', date: '11 jun, 21:10', amount: -24.5, icon: '↗', color: 'blue' },
 ]
 
-function App() {
+function Dashboard() {
   const [transactions, setTransactions] = useState(initialTransactions)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [activeNav, setActiveNav] = useState('Visão geral')
@@ -58,11 +104,11 @@ function App() {
         <nav className="main-nav" aria-label="Navegação principal">
           {['Visão geral', 'Transações', 'Orçamentos', 'Metas'].map((item, index) => <button key={item} className={activeNav === item ? 'nav-item active' : 'nav-item'} onClick={() => setActiveNav(item)}><span className="nav-icon">{['⌂', '↔', '▥', '◎'][index]}</span>{item}</button>)}
         </nav>
-        <div className="sidebar-bottom"><button className="nav-item"><span className="nav-icon">⚙</span>Configurações</button><div className="help-box"><span className="help-icon">?</span><strong>Precisa de ajuda?</strong><span>Acesse nossa central de suporte.</span><button>Falar com suporte <span>↗</span></button></div><span className="version">Clarus v1.0.0</span></div>
+        <div className="sidebar-bottom"><button className="nav-item" onClick={async () => { try { await api.logout() } finally { clearSessao(); window.location.assign('/login') } }}><span className="nav-icon">↪</span>Sair</button><div className="help-box"><span className="help-icon">?</span><strong>Precisa de ajuda?</strong><span>Acesse nossa central de suporte.</span><button>Falar com suporte <span>↗</span></button></div><span className="version">Clarus v1.0.0</span></div>
       </aside>
 
       <main className="content">
-        <header className="topbar"><div className="breadcrumb"><span>Workspace</span><span>/</span><strong>{activeNav}</strong></div><div className="top-actions"><button className="icon-button" aria-label="Pesquisar">⌕</button><button className="icon-button notification" aria-label="Notificações">♧<i /></button><button className="add-button" onClick={() => setIsModalOpen(true)}><span>+</span> Novo lançamento</button></div></header>
+        <header className="topbar"><div className="breadcrumb"><span>Workspace</span><span>/</span><strong>{activeNav}</strong></div><div className="top-actions"><button className="export-button" onClick={async () => { try { const arquivo = await api.exportarCsv(); const url = URL.createObjectURL(arquivo); const link = document.createElement('a'); link.href = url; link.download = 'transacoes.csv'; link.click(); URL.revokeObjectURL(url) } catch (error) { setNotice(error instanceof ApiError && error.status === 401 ? 'Sessão expirada. Entre novamente.' : 'Não foi possível exportar o CSV.') } }}>Exportar CSV</button><button className="add-button" onClick={() => setIsModalOpen(true)}><span>+</span> Novo lançamento</button></div></header>
         <div className="page-heading"><div><p className="eyebrow">QUARTA-FEIRA, 18 DE JUNHO DE 2025</p><h1>Bom dia, Larissa <span>✦</span></h1><p className="subtitle">Aqui está um resumo do seu dinheiro hoje.</p></div><button className="period-select">Junho 2025 <span>⌄</span></button></div>
 
         <section className="stats-grid" aria-label="Resumo financeiro"><article className="stat-card balance"><div className="stat-top"><span>Saldo disponível</span><span className="stat-icon">◒</span></div><strong>R$ 8.420,60</strong><div className="trend positive"><span>↗ 12,8%</span><span>vs. mês anterior</span></div></article><article className="stat-card"><div className="stat-top"><span>Receitas</span><span className="stat-icon mint-icon">↗</span></div><strong>R$ 5.200,00</strong><div className="trend positive"><span>↗ 5,2%</span><span>vs. mês anterior</span></div></article><article className="stat-card"><div className="stat-top"><span>Despesas</span><span className="stat-icon peach-icon">↘</span></div><strong>R$ {totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong><div className="trend negative"><span>↘ 3,4%</span><span>vs. mês anterior</span></div></article><article className="stat-card"><div className="stat-top"><span>Taxa de economia</span><span className="stat-icon blue-icon">◔</span></div><strong>42,6%</strong><div className="trend positive"><span>↗ 8,1%</span><span>vs. mês anterior</span></div></article></section>
@@ -76,6 +122,35 @@ function App() {
       {notice && <div className="toast">✓ {notice}</div>}
     </div>
   )
+}
+
+function App() {
+  const [path, setPath] = useState(window.location.pathname)
+  const [sessaoValida, setSessaoValida] = useState(Boolean(getToken()))
+
+  useEffect(() => {
+    const atualizarRota = () => setPath(window.location.pathname)
+    window.addEventListener('popstate', atualizarRota)
+    return () => window.removeEventListener('popstate', atualizarRota)
+  }, [])
+
+  useEffect(() => {
+    if (!getToken()) {
+      setSessaoValida(false)
+      return
+    }
+    api.me().then((usuario) => setSessao(getToken()!, usuario)).catch(clearSessao).finally(() => setSessaoValida(false))
+  }, [])
+
+  if (path === '/login' || path === '/register') {
+    return <AuthPage mode={path === '/register' ? 'register' : 'login'} onAuthenticated={() => setPath('/')} />
+  }
+  if (sessaoValida) return <main className="auth-page"><p>Verificando sessão...</p></main>
+  if (!getUsuario()) {
+    window.history.replaceState(null, '', '/login')
+    return <AuthPage mode="login" onAuthenticated={() => setPath('/')} />
+  }
+  return <Dashboard />
 }
 
 export default App

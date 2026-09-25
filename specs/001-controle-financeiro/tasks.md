@@ -135,10 +135,10 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 **Independent Test**: dois usuários sem vazamento de dados
 
 - [ ] T034 [US6] [João] Garantir `Usuario` + `usuario_id` em Categoria/Transacao e seed por usuário
-- [ ] T035 [US6] [Duda] JWT + bcrypt em `backend/app/core/security.py` e `backend/app/api/v1/endpoints/auth.py`
-- [ ] T036 [P] [US6] [Duda] Páginas de login e cadastro no `Front-end`
-- [ ] T037 [US6] [Duda] Middleware de rotas, sessão persistente, logout
-- [ ] T038 [US6] [Duda] Isolamento: toda query/API usa `usuarioId` da sessão (401/403 sem sessão)
+- [x] T035 [US6] [Duda] JWT + bcrypt em `backend/app/core/security.py` e `backend/app/api/v1/endpoints/auth.py`
+- [x] T036 [P] [US6] [Duda] Páginas de login e cadastro no `Front-end`
+- [x] T037 [US6] [Duda] Middleware de rotas, sessão persistente, logout
+- [x] T038 [US6] [Duda] Isolamento: toda query/API usa `usuarioId` da sessão (401/403 sem sessão)
 - [ ] T039 [US6] [Natalia] Integrar auth ao dashboard, redirects e erros; QA com duas contas
 
 **Checkpoint**: visitante não entra no dashboard; A não vê dados de B
