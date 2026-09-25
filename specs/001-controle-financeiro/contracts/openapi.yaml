@@ -320,7 +320,7 @@ paths:
       parameters:
         - in: query
           name: meses
-          schema: { type: integer, default: 6, maximum: 24 }
+          schema: { type: integer, default: 6, minimum: 1, maximum: 24 }
       responses:
         "200":
           description: OK

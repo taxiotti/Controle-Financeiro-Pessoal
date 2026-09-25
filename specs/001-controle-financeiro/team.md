@@ -7,7 +7,7 @@ Como usar: cada integrante pega as tasks com o seu nome em [tasks.md](./tasks.md
 | **João** | Backend & banco | Modelagem SQLAlchemy/SQLModel (`transacoes`/`categorias`) e migrations | Média | Alta | A fazer |
 | **João** | Backend & banco | Endpoints CRUD de categorias | Baixa | Média | A fazer |
 | **João** | Backend & banco | Endpoints CRUD de transações | Média | Média | A fazer |
-| **João** | Backend & banco | Agregações (resumo + gráficos) | Média | Alta | A fazer |
+| **João** | Backend & banco | Agregações (resumo + gráficos) | Média | Alta | Concluída |
 | **João** | Backend & banco | Filtros no backend (período, tipo, categoria, valor) | Média | Média | A fazer |
 | **João** | Backend & banco | Tabela `usuarios` e vínculo com transações/categorias | Baixa | Média | A fazer |
 | **Nakashima** | Frontend & componentes | Componentes base (botões, inputs, modais, tabela) | Média | Baixa | Concluída |
