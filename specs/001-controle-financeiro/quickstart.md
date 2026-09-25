@@ -5,11 +5,11 @@ em uma etapa futura e não é necessária para executar US1–US5.
 
 ## Pré-requisitos
 
+- Python 3.12
 - Node.js 20 LTS
-- npm
 - Git
 
-## Primeira vez
+## Backend (FastAPI)
 
 ```bash
 cd Front-end

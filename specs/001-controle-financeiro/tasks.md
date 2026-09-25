@@ -219,7 +219,7 @@ Depois de categorias:
 
 ### MVP First (US1–US3)
 
-1. Phase 1 Natalia
+1. Phase 1 Natalia (Vite + URL da API; backend já esboçado)
 2. Phase 2 João + Nakashima
 3. US1 → US2 → US3
 4. **STOP**: demo do resumo mensal

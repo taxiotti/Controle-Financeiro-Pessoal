@@ -202,4 +202,4 @@ Como usuário autenticado, quero baixar a listagem (respeitando filtros ativos) 
 - Gráficos: Recharts. Formulários: React Hook Form + Zod. UI: CSS próprio responsivo.
 - Recorrência: o campo `recorrente` NÃO faz parte do MVP (pode existir no banco como `false` fixo, sem UI).
 - Tema claro/escuro é desejável, mas não bloqueia aceite das histórias P1–P4.
-- Um único app, sem multi-moeda (apenas BRL).
+- Sem multi-moeda (apenas BRL).

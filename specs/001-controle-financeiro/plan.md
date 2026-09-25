@@ -1,6 +1,6 @@
 # Implementation Plan: Controle Financeiro Pessoal
 
-**Branch**: `001-controle-financeiro` | **Date**: 2026-09-14 | **Spec**: [spec.md](./spec.md)
+**Branch**: `001-controle-financeiro` | **Date**: 2026-09-18 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `/specs/001-controle-financeiro/spec.md`
 
@@ -18,7 +18,7 @@ App web para uma pessoa registrar receitas/despesas por categoria e ver resumo e
 
 **Testing**: Vitest para regras de domínio; build, lint e testes manuais de aceite por história
 
-**Target Platform**: Navegador moderno (Chrome/Edge/Firefox/Safari); viewport mobile ~375px e desktop ~1280px
+**Target Platform**: Navegador moderno; viewport mobile ~375px e desktop ~1280px; API local na porta 8000
 
 **Project Type**: SPA Vite em `Front-end/` + serviço FastAPI futuro em `Back-end/`
 
@@ -26,7 +26,7 @@ App web para uma pessoa registrar receitas/despesas por categoria e ver resumo e
 
 **Constraints**: BRL only; validação Pydantic obrigatória quando a API existir; sem secrets no git; pt-BR na UI; HTTPS só exigido em produção futura
 
-**Scale/Scope**: 5 integrantes, 1 app, ~4 rotas autenticadas, 3 entidades, 7 user stories
+**Scale/Scope**: 5 integrantes, 2 pastas de código, ~4 rotas autenticadas, 3 entidades, 7 user stories
 
 ## Constitution Check
 
@@ -39,8 +39,6 @@ App web para uma pessoa registrar receitas/despesas por categoria e ver resumo e
 | III. Contrato de API compartilhado | PASS | `contracts/openapi.yaml` |
 | IV. Isolamento e validação no servidor | PASS | `usuarioId` após US6; Pydantic nas rotas FastAPI |
 | V. UX brasileira e acessível | PASS | `Intl` pt-BR; confirmação delete; labels; texto nos gráficos |
-
-Violations: nenhuma. Complexity Tracking vazio.
 
 ## Project Structure
 
@@ -84,4 +82,6 @@ Back-end/                        # futuro, não criado nesta entrega
 
 ## Complexity Tracking
 
-> Nenhuma violação da constituição a justificar.
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|-------------------------------------|
+| Dois serviços (SPA + API) | Front-end já é Vite; backend será Python | Next.js monolito contradiz a pasta `Front-end/` e a escolha FastAPI |

@@ -4,7 +4,8 @@ info:
   version: 0.1.0
   description: Contrato compartilhado. Mudanças de campo exigem atualizar este arquivo no mesmo PR.
 servers:
-  - url: /api
+  - url: http://localhost:8000/api
+    description: FastAPI local (backend/)
 tags:
   - name: Categorias
   - name: Transacoes
@@ -171,7 +172,7 @@ paths:
   /transacoes:
     get:
       tags: [Transacoes]
-      summary: Lista paginada com filtros
+      summary: Lista paginada de transações
       parameters:
         - in: query
           name: page
@@ -179,30 +180,22 @@ paths:
         - in: query
           name: pageSize
           schema: { type: integer, default: 20, maximum: 100 }
-        - in: query
-          name: from
-          schema: { type: string, format: date }
-        - in: query
-          name: to
-          schema: { type: string, format: date }
-        - in: query
-          name: tipo
-          schema: { type: string, enum: [receita, despesa] }
-        - in: query
-          name: categoriaId
-          schema: { type: string, format: uuid }
-        - in: query
-          name: minValor
-          schema: { type: number }
-        - in: query
-          name: maxValor
-          schema: { type: number }
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema: { $ref: "#/components/schemas/PaginaTransacoes" }
+        "400":
+          description: Parâmetros de paginação inválidos.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "503":
+          description: Usuário de desenvolvimento ausente; executar seed (antes da US6).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
     post:
       tags: [Transacoes]
       requestBody:
@@ -217,6 +210,11 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Transacao" }
         "400": { description: Validação }
+        "503":
+          description: Usuário de desenvolvimento ausente; executar seed (antes da US6).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
   /transacoes/{id}:
     patch:
       tags: [Transacoes]
@@ -226,6 +224,7 @@ paths:
           required: true
           schema: { type: string, format: uuid }
       requestBody:
+        required: true
         content:
           application/json:
             schema: { $ref: "#/components/schemas/TransacaoInput" }
@@ -235,7 +234,21 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Transacao" }
-        "404": { description: Não encontrada }
+        "400":
+          description: Payload, UUID ou categoria inválidos, ou tipo incompatível com a categoria.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Transação inexistente ou pertencente a outro usuário.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "503":
+          description: Usuário de desenvolvimento ausente; executar seed (antes da US6).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
     delete:
       tags: [Transacoes]
       parameters:
@@ -245,6 +258,21 @@ paths:
           schema: { type: string, format: uuid }
       responses:
         "204": { description: Removida }
+        "400":
+          description: UUID inválido.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Transação inexistente ou pertencente a outro usuário.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "503":
+          description: Usuário de desenvolvimento ausente; executar seed (antes da US6).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
   /relatorios/resumo:
     get:
       tags: [Relatorios]
@@ -332,7 +360,7 @@ paths:
   /auth/register:
     post:
       tags: [Auth]
-      description: Implementação via Auth.js; este path é o contrato lógico da Duda (pode ser Server Action).
+      description: Registro no FastAPI (`POST /api/auth/register`). Duda implementa JWT nas demais rotas de sessão.
       requestBody:
         required: true
         content:
