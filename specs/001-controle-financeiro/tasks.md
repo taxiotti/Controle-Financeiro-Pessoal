@@ -16,7 +16,7 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 - **[P]**: pode em paralelo (arquivo diferente)
 - **[Story]**: US1…US7
-- Caminhos reais: `backend/` (FastAPI) e `Front-end/` (Vite)
+- Caminhos reais do Front-end Vite e do futuro Back-end FastAPI
 
 ---
 
@@ -24,29 +24,29 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Purpose**: repositório pronto para todo mundo clonar e rodar
 
-- [x] T001 [Natalia] Garantir pasta `Front-end/` (Vite+React) e `backend/` (FastAPI) sem apagar `.specify/`, `.cursor/` nem `specs/`
-- [ ] T002 [Natalia] Configurar Tailwind, shadcn/ui em `Front-end/`, `VITE_API_URL=http://localhost:8000/api`
-- [ ] T003 [P] [Natalia] Adicionar no Front-end TanStack Query, React Hook Form, Zod, Recharts, lucide-react
-- [ ] T004 [P] [Natalia] Ajustar README com o fluxo do `quickstart.md` (API 8000 + UI 5173)
+- [x] T001 [Natalia] Consolidar o app React + TypeScript + Vite em `Front-end/` sem apagar `.specify/`, `.cursor/` nem `specs/`
+- [x] T002 [Natalia] Configurar CSS próprio responsivo, ESLint e metadados pt-BR do Front-end
+- [x] T003 [P] [Natalia] Adicionar React Router, TanStack Query, React Hook Form, Zod, Recharts, lucide-react e Vitest em `Front-end/package.json`
+- [x] T004 [P] [Natalia] Ajustar README com o fluxo do `quickstart.md` e apontar `specs/001-controle-financeiro/`
 
-**Checkpoint**: `uvicorn` em :8000 e `npm run dev` em :5173
+**Checkpoint**: `cd Front-end && npm install && npm run dev` sobe a SPA
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: banco, validações e layout — bloqueia as histórias
+**Purpose**: contrato, adapter local, validações e layout; banco FastAPI fica para etapa futura
 
-**⚠️ CRITICAL**: histórias de produto só depois desta fase
+**CRITICAL**: histórias de produto só depois da fundação do Front-end
 
-- [x] T005 [João] Completar models SQLAlchemy em `backend/app/models/` e índices de `data-model.md` (tabelas via `create_all` na subida da API; sem migrations)
-- [x] T006 [João] Implementar `backend/app/seed.py` (usuário `dev@local.test` + categorias padrão)
-- [x] T007 [P] [João] Completar schemas Pydantic em `backend/app/schemas/` alinhados a `contracts/openapi.yaml`
-- [ ] T008 [P] [Nakashima] Instalar componentes shadcn (Button, Input, Label, Dialog, Table, Select, Card, Alert) em `Front-end/src/components/ui/`
-- [ ] T009 [Nakashima] Layout/nav do dashboard no Front-end (Início, Transações, Categorias, Relatórios)
-- [ ] T010 [P] [Natalia] `Front-end/src/lib/utils.ts` (`formatMoney`, `formatDate`) e `api-client.ts` (`VITE_API_URL`)
+- [ ] T005 [João] Criar modelos SQLAlchemy/SQLModel (Usuario, Categoria, Transacao), índices de `data-model.md` e primeira migration no futuro `Back-end/`
+- [ ] T006 [João] Implementar seed FastAPI (usuário `dev@local.test` + categorias padrão) e sessão de banco
+- [ ] T007 [P] [João] Criar schemas Pydantic de categoria e transação alinhados a `contracts/openapi.yaml`
+- [x] T008 [P] [Nakashima] Criar componentes visuais base (botões, inputs, modais, tabelas, cards e alertas) com CSS próprio
+- [x] T009 [Nakashima] Criar layout em `Front-end/src/components/DashboardLayout.tsx` (nav: Início, Transações, Categorias, Relatórios)
+- [x] T010 [P] [Natalia] Criar formatação pt-BR, tipos do contrato, interface de cliente e adapter `localStorage`
 
-**Checkpoint**: SQLite criado na subida da API; layout navega entre rotas vazias; `/health` responde ok
+**Checkpoint**: layout navega entre rotas e o adapter local cria as categorias padrão; backend continua pendente
 
 ---
 
@@ -56,11 +56,11 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Independent Test**: criar/editar categoria e recarregar a página
 
-- [x] T011 [US1] [João] `GET`/`POST` em `backend/app/api/v1/endpoints/categorias.py`
-- [x] T012 [US1] [João] `PATCH`/`DELETE` em `categorias.py` (409 se padrão ou em uso)
-- [ ] T013 [P] [US1] [Nakashima] `Front-end/src/components/categoria-form.tsx` (modal, cor, ícone, validação)
-- [ ] T014 [US1] [Nakashima] Página de categorias no Front-end (tabela + ações)
-- [ ] T015 [US1] [Natalia] Ligar a página às APIs, toasts de erro/sucesso, conferir seed padrão
+- [ ] T011 [US1] [João] FastAPI `GET`/`POST /categorias`
+- [ ] T012 [US1] [João] FastAPI `PATCH`/`DELETE /categorias/{id}` (409 se padrão ou em uso)
+- [x] T013 [P] [US1] [Nakashima] Formulário de categoria em `Front-end/src/pages/CategoriasPage.tsx` (modal, cor, ícone, validação)
+- [x] T014 [US1] [Nakashima] Página `/categorias` com grid e ações
+- [x] T015 [US1] [Natalia] Ligar a página ao adapter local, feedback de erro/sucesso e seed padrão
 
 **Checkpoint**: US1 testável sem transações
 
@@ -72,11 +72,11 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Independent Test**: criar receita e despesa, editar, excluir com confirmação
 
-- [x] T016 [US2] [João] `GET` (paginação) / `POST` em `backend/app/api/v1/endpoints/transacoes.py`
-- [x] T017 [US2] [João] `PATCH`/`DELETE` em `transacoes.py` + checagem tipo × categoria
-- [ ] T018 [P] [US2] [Nakashima] `Front-end/src/components/transacao-form.tsx` (React Hook Form + Zod)
-- [ ] T019 [US2] [Nakashima] Página de transações (tabela paginada + confirmação de exclusão)
-- [ ] T020 [US2] [Natalia] Integrar form/lista com API; estados loading/erro; conferir pt-BR
+- [ ] T016 [US2] [João] FastAPI `GET` paginado / `POST /transacoes`
+- [ ] T017 [US2] [João] FastAPI `PATCH`/`DELETE /transacoes/{id}` + checagem tipo × categoria
+- [x] T018 [P] [US2] [Nakashima] Formulário de transação com React Hook Form + Zod
+- [x] T019 [US2] [Nakashima] Página `/transacoes` com tabela paginada e confirmação de exclusão
+- [x] T020 [US2] [Natalia] Integrar form/lista ao adapter local; estados loading/erro; conferir pt-BR
 
 **Checkpoint**: histórico funciona mesmo com resumo ainda mockado
 
@@ -88,9 +88,9 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Independent Test**: lançar no mês atual e ver totais em R$
 
-- [ ] T021 [US3] [João] `GET /api/relatorios/resumo` em `backend/app/api/v1/endpoints/relatorios.py` (agrega por `data`)
-- [ ] T022 [P] [US3] [Taxiotti] `Front-end/src/components/resumo-cards.tsx` + home (estado vazio = R$ 0,00; saldo negativo destacado)
-- [ ] T023 [US3] [Natalia] Integrar cards com `/api/relatorios/resumo`; conferir SC-004 vs soma manual
+- [ ] T021 [US3] [João] FastAPI `GET /relatorios/resumo` (agrega por `data`)
+- [x] T022 [P] [US3] [Taxiotti] Cards e dashboard em `Front-end/src/pages/DashboardPage.tsx` (estado vazio = R$ 0,00; saldo negativo destacado)
+- [x] T023 [US3] [Natalia] Integrar cards ao adapter local; conferir SC-004 vs soma manual
 
 **Checkpoint**: MVP demonstrável (US1+US2+US3)
 
@@ -102,9 +102,9 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Independent Test**: combinar filtros e limpar
 
-- [ ] T024 [US4] [João] Query params `from`, `to`, `tipo`, `categoriaId`, `minValor`, `maxValor` em `GET /api/transacoes`
-- [ ] T025 [P] [US4] [Nakashima] `Front-end/src/components/transacao-filtros.tsx` na listagem + botão limpar
-- [ ] T026 [US4] [Natalia] Ligar querystring da UI à API; paginação preserva filtros
+- [ ] T024 [US4] [João] Query params `from`, `to`, `tipo`, `categoriaId`, `minValor`, `maxValor` em `GET /transacoes` no FastAPI
+- [x] T025 [P] [US4] [Nakashima] Filtros na listagem + botão limpar
+- [x] T026 [US4] [Natalia] Ligar querystring da UI ao adapter local; paginação preserva filtros
 
 **Checkpoint**: lista filtrada consistente após F5
 
@@ -116,13 +116,13 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Independent Test**: dois meses / duas categorias; totais = API
 
-- [ ] T027 [US5] [João] `GET /api/relatorios/pizza` em `relatorios.py`
-- [ ] T028 [P] [US5] [João] `GET /api/relatorios/evolucao` e `/comparativo` em `relatorios.py`
-- [ ] T029 [P] [US5] [Taxiotti] `Front-end/src/components/grafico-pizza.tsx` + tabela/ARIA equivalente
-- [ ] T030 [P] [US5] [Taxiotti] `Front-end/src/components/grafico-linha.tsx`
-- [ ] T031 [US5] [Taxiotti] `Front-end/src/components/comparativo-mes.tsx` + página Relatórios
-- [ ] T032 [US5] [Taxiotti] Ajustes de responsividade (375px e 1280px) em dashboard, gráficos e tabelas
-- [ ] T033 [US5] [Natalia] Integrar Relatórios às 3 APIs; empty state; conferir totais
+- [ ] T027 [US5] [João] FastAPI `GET /relatorios/pizza`
+- [ ] T028 [P] [US5] [João] FastAPI `GET /relatorios/evolucao` e `/relatorios/comparativo`
+- [x] T029 [P] [US5] [Taxiotti] Gráfico de pizza + tabela equivalente
+- [x] T030 [P] [US5] [Taxiotti] Gráfico de linha + tabela equivalente
+- [x] T031 [US5] [Taxiotti] Comparativo e página `/relatorios`
+- [x] T032 [US5] [Taxiotti] Ajustes de responsividade (375px e 1280px) em dashboard, gráficos e tabelas
+- [x] T033 [US5] [Natalia] Integrar Relatórios ao adapter local; empty state; conferir totais
 
 **Checkpoint**: US5 independente, MVP intacto
 
@@ -134,10 +134,10 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 **Independent Test**: dois usuários sem vazamento de dados
 
-- [ ] T034 [US6] [João] Garantir `Usuario` + `usuario_id` em Categoria/Transacao e seed por usuário
-- [ ] T035 [US6] [Duda] JWT + bcrypt em `backend/app/core/security.py` e `backend/app/api/v1/endpoints/auth.py`
-- [ ] T036 [P] [US6] [Duda] Páginas de login e cadastro no `Front-end`
-- [ ] T037 [US6] [Duda] Middleware de rotas, sessão persistente, logout
+- [ ] T034 [US6] [João] Garantir `Usuario` + `usuarioId` em Categoria/Transacao, migration e seed por usuário
+- [ ] T035 [US6] [Duda] Implementar autenticação no FastAPI com credenciais e hash seguro
+- [ ] T036 [P] [US6] [Duda] Páginas `/login` e `/register` no Front-end
+- [ ] T037 [US6] [Duda] Proteção de rotas, sessão persistente e logout
 - [ ] T038 [US6] [Duda] Isolamento: toda query/API usa `usuarioId` da sessão (401/403 sem sessão)
 - [ ] T039 [US6] [Natalia] Integrar auth ao dashboard, redirects e erros; QA com duas contas
 
@@ -152,7 +152,7 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 **Independent Test**: filtrar, baixar, abrir no Excel
 
 - [ ] T040 [US7] [João] (se combinado) dados para export no servidor — ou Duda usa a mesma query
-- [ ] T041 [US7] [Duda] Completar `GET /api/transacoes/export` em `transacoes.py` (`text/csv`) + botão na listagem
+- [ ] T041 [US7] [Duda] FastAPI `GET /transacoes/export` (`text/csv`) + botão na listagem
 - [ ] T042 [US7] [Natalia] QA: filtros da tela = linhas do arquivo; cabeçalho ok
 
 **Checkpoint**: extra do roadmap (CSV) entregue; PDF continua fora
@@ -161,9 +161,9 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 
 ## Phase 10: Polish & Cross-Cutting Concerns
 
-- [ ] T043 [Natalia] Percorrer fluxos do `quickstart.md`, erros, confirmações de exclusão, labels
-- [ ] T044 [P] [Nakashima] Refino visual de nav, forms e espaçamento (sem mudar contrato)
-- [ ] T045 [Natalia] Atualizar status em `team.md` / `tasks.md` e README se o setup mudou
+- [x] T043 [Natalia] Percorrer fluxos do `quickstart.md`, erros, confirmações de exclusão, labels
+- [x] T044 [P] [Nakashima] Refino visual de nav, forms e espaçamento (sem mudar contrato)
+- [x] T045 [Natalia] Atualizar status em `team.md` / `tasks.md` e README após mudança para Vite + FastAPI futuro
 
 ---
 

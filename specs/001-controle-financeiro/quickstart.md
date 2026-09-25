@@ -1,6 +1,7 @@
 # Quickstart — Controle Financeiro Pessoal
 
-Dois processos: API (8000) e UI (5173).
+Para o grupo subir o Front-end com dados locais. A API FastAPI será adicionada
+em uma etapa futura e não é necessária para executar US1–US5.
 
 ## Pré-requisitos
 
@@ -11,33 +12,18 @@ Dois processos: API (8000) e UI (5173).
 ## Backend (FastAPI)
 
 ```bash
-cd backend
-python -m venv .venv
-.\.venv\Scripts\activate
-pip install -r requirements.txt
-copy .env.example .env
-python -m app.seed
-uvicorn app.main:app --reload --port 8000
-```
-
-- API: http://localhost:8000
-- Swagger: http://localhost:8000/docs
-
-## Front-end (Vite)
-
-```bash
 cd Front-end
 npm install
+npm run dev
 ```
 
-Crie `Front-end/.env` com `VITE_API_URL=http://localhost:8000/api` e rode `npm run dev`. Abra http://localhost:5173.
+Abra a URL informada pelo Vite (normalmente `http://localhost:5173`).
 
-## Usuário de desenvolvimento (após seed)
+## Dados locais
 
-- E-mail: `dev@local.test`
-- Senha: ver `backend/.env.example` (`DEV_USER_PASSWORD`)
-
-Antes da US6, a API pode operar só com esse usuário implícito.
+Antes da US6, o app opera com usuário único implícito. Categorias e transações
+ficam no `localStorage` deste navegador. Limpar os dados do site reinicia o
+adapter e recria as nove categorias padrão.
 
 ## Rotas da UI
 
@@ -51,16 +37,13 @@ Antes da US6, a API pode operar só com esse usuário implícito.
 
 ## Ordem segura de desenvolvimento
 
-1. Natalia: Vite + `VITE_API_URL` + CORS conferido no FastAPI.
-2. João: models + seed + `GET/POST /api/categorias`.
-3. Nakashima: UI categorias contra a API (ou mock do contrato).
-4. João: CRUD transações + resumo.
-5. Nakashima + Taxiotti em paralelo.
-6. Natalia liga telas ↔ APIs.
-7. João: filtros + relatórios JSON.
-8. Taxiotti: gráficos. Natalia integra.
-9. João: FK usuário. Duda: JWT + telas + isolamento.
-10. Duda: CSV. Natalia: QA.
+1. Natalia: setup Vite, dependências e adapter local alinhado ao contrato.
+2. Nakashima: categorias, transações, validações, filtros e paginação.
+3. Taxiotti: cards, gráficos, comparativo e responsividade.
+4. Natalia: integração local, estados de erro e QA US1–US5.
+5. João, em etapa futura: FastAPI + Pydantic + persistência e endpoints.
+6. Natalia troca o adapter local pelo HTTP quando o contrato estiver implementado.
+7. Duda implementa autenticação e CSV após a API.
 
 ## Conferência rápida do MVP (P1)
 

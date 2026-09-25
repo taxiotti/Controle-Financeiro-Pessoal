@@ -2,54 +2,52 @@
 
 **Date**: 2026-09-18
 
-## 1. SPA Vite + API FastAPI (emenda 2026-09-18)
+## 1. React + Vite e FastAPI
 
-**Decision**: `Front-end/` (React + Vite) e `backend/` (Python + FastAPI).
+**Decision**: manter a SPA React + TypeScript + Vite em `Front-end/` e implementar o backend futuramente como serviço FastAPI separado.
 
-**Rationale**: o frontend do grupo já está em Vite. O backend será Python para João trabalhar a API com FastAPI, independente da UI.
+**Rationale**: o protótipo Vite já existe e FastAPI é a tecnologia definida para a API. O contrato `contracts/openapi.yaml` desacopla as entregas e evita que as páginas dependam da implementação do servidor.
 
-**Rejected**: Next.js monolito da spec v1 — não reflete o `Front-end/` existente nem FastAPI.
+**Frontend-only atual**: US1–US5 usam um adapter `localStorage` com as mesmas entidades, filtros, paginação e agregações do contrato. Nenhuma rota FastAPI é criada nesta etapa.
 
-## 2. SQLAlchemy 2 + SQLite (sem migrations)
+## 2. Persistência futura
 
-**Decision**: ORM SQLAlchemy 2; SQLite no `.env` local. Tabelas criadas com `Base.metadata.create_all` na subida da API. UUID como string; `Numeric(12, 2)` para dinheiro.
+**Decision**: FastAPI + Pydantic para transporte/validação e SQLAlchemy ou SQLModel para persistência; SQLite no desenvolvimento, com desenho migrável para PostgreSQL.
 
-**Rationale**: o grupo não vai manter histórico de schema com Alembic. `create_all` basta para o trabalho acadêmico.
+**Rationale**: Pydantic mantém validação explícita no limite HTTP; tipos decimais no Python e no banco evitam erro visível de ponto flutuante.
 
-**Rejected**: Alembic (overhead de migrations neste projeto); Prisma Python.
+## 3. Autenticação
 
-## 3. JWT no FastAPI + bcrypt
+**Decision**: a US6 será definida no serviço FastAPI, com senha armazenada por hash e sessão/token seguro. O mecanismo exato será fechado antes da implementação da US6.
 
-**Decision**: `passlib`/`bcrypt` + JWT (`python-jose`). Telas de login continuam no Vite (Duda).
+**Rejected**: autenticação apenas no client; ela não fornece isolamento nem segurança. A fase frontend-only opera com usuário único implícito.
 
-**Rationale**: auth vive na API. Frontend guarda token e manda `Authorization`. Sem OAuth nesta versão.
+## 4. Contrato e estado no cliente
 
-**Rejected**: Auth.js/NextAuth (depende de Next.js).
+**Decision**: TanStack Query para consultas/mutações; React Hook Form + Zod no cliente; modelos Pydantic equivalentes no FastAPI.
 
-## 4. Momento da autenticação
+**Rationale**: o frontend não reutiliza código Python, mas os dois lados seguem os mesmos schemas e status descritos no OpenAPI.
 
-**Decision**: schema já nasce com `usuario_id` opcional + seed `dev@local.test`. Rotas P1/P2 podem usar esse usuário até a US6.
+## 5. Dinheiro e datas
 
-**Rationale**: constituição exige MVP sem auth. João modela `usuarios` cedo para não refazer FK.
+**Decision**: respostas monetárias são strings decimais; o adapter local persiste strings e calcula em centavos inteiros. A API futura deve usar `Decimal`. “Mês corrente” usa a data da transação em `America/Sao_Paulo`.
 
-## 5. Gráficos
+## 6. Gráficos
 
-**Decision**: Recharts. Agregação no servidor (`/api/relatorios/*`). Taxiotti só consome JSON.
+**Decision**: Recharts no frontend. O adapter local agrega todas as transações, não apenas a página visível; no backend futuro, as agregações passam aos endpoints `/relatorios/*`.
 
-## 6. Estado no cliente
+**Acessibilidade**: cada gráfico acompanha uma tabela com os mesmos valores.
 
-**Decision**: TanStack Query; React Hook Form + Zod no cliente; Pydantic nas Route handlers FastAPI, espelhando `openapi.yaml`.
+## 7. Fora de escopo atual
 
-## 7. Fora de escopo
-
-Recorrência automática, PDF, PWA, push/e-mail, Open Finance, tema dark como aceite.
+Backend FastAPI, autenticação, CSV, recorrência automática, PDF, PWA, notificações, Open Finance e tema escuro.
 
 ## 8. Papéis e fronteiras
 
-| Área | Dono | Não faz |
+| Área | Dono | Fronteira |
 |---|---|---|
-| SQLAlchemy, rotas FastAPI, queries | João | CSS/layout de páginas |
-| shadcn, forms, tabelas, filtros UI | Nakashima | SQL |
-| Dashboard, Recharts, responsivo visual | Taxiotti | endpoints |
-| JWT, telas login, CSV | Duda | CRUD de categoria/transação |
-| Vite, CORS/`VITE_API_URL`, wiring, QA | Natalia | reimplementar o que o dono já fez |
+| FastAPI, Pydantic, persistência e queries | João | `contracts/openapi.yaml` |
+| Forms, tabelas, filtros e navegação | Nakashima | `Front-end/src/` |
+| Dashboard, Recharts e responsividade | Taxiotti | DTOs de relatório |
+| Auth e CSV | Duda | API FastAPI após US6 |
+| Setup, adapter, integração e QA | Natalia | contrato e quickstart |
