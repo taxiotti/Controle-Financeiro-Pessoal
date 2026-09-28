@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { ArrowDownLeft, ArrowUpRight, CircleDollarSign, ReceiptText } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { financeClient } from '../api/localClient'
+import { financeClient } from '../api/httpClient'
 import { currentMonth, decimalToCents, formatDate, formatMoney, monthLabel } from '../lib/format'
 
 export function DashboardPage() {

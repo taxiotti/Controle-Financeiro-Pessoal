@@ -14,6 +14,20 @@ npm run dev
 
 O Vite informa a URL local, normalmente `http://localhost:5173`.
 
+Em outro terminal, suba o backend e carregue as categorias padrão:
+
+```bash
+cd ../backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+python -m app.seed
+uvicorn app.main:app --reload
+```
+
+Por padrão, o frontend usa `http://localhost:8000/api`. Para outro endereço,
+crie `Front-end/.env.local` com `VITE_API_URL=http://servidor:porta/api`.
+
 ## Verificações
 
 ```bash
@@ -31,19 +45,20 @@ npm run build
 - US5: pizza por categoria, evolução mensal e comparativo.
 - UI em português, BRL, datas brasileiras e layout responsivo.
 
-## Dados locais
+## Integração com API
 
-Esta etapa não possui backend. O adapter em `src/api/localClient.ts` grava
-categorias e transações na chave versionada `cfp:v1:data` do `localStorage`.
-Limpar os dados do site recria as nove categorias padrão.
+As páginas usam `src/api/httpClient.ts`, que chama o backend FastAPI nos
+endpoints de categorias e transações. Os tipos em `src/api/types.ts` seguem
+`specs/001-controle-financeiro/contracts/openapi.yaml`.
 
-Os tipos em `src/api/types.ts` seguem
-`specs/001-controle-financeiro/contracts/openapi.yaml`. Quando a API FastAPI
-estiver pronta, um adapter HTTP poderá substituir o cliente local sem mudar
-as páginas.
+O backend atual ainda não disponibiliza filtros nem endpoints de relatórios.
+Enquanto isso, o cliente busca as páginas de transações da API e aplica os
+filtros e agregações necessários para manter o dashboard e os gráficos
+coerentes com os dados do servidor.
 
 ## Limites
 
-Autenticação, isolamento real entre usuários, CSV e o serviço FastAPI ainda
-não foram implementados. O armazenamento local serve para desenvolvimento e
-demonstração; não deve ser tratado como proteção de dados financeiros.
+Autenticação, isolamento real entre usuários, CSV, filtros no servidor e
+endpoints de relatórios ainda não foram implementados. O backend usa o usuário
+de desenvolvimento definido em sua configuração; não deve ser tratado como
+proteção de dados financeiros.
