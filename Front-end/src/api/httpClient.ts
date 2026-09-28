@@ -50,6 +50,31 @@ function queryString(values: Record<string, string | number | undefined>): strin
   return query ? `?${query}` : ''
 }
 
+function queryFiltros(filtros: FiltrosTransacao): string {
+  return queryString({
+    from: filtros.from,
+    to: filtros.to,
+    tipo: filtros.tipo,
+    categoriaId: filtros.categoriaId,
+    minValor: filtros.minValor?.replace(',', '.'),
+    maxValor: filtros.maxValor?.replace(',', '.'),
+  })
+}
+
+async function requestCsv(path: string): Promise<Blob> {
+  let response: Response
+  try {
+    response = await fetch(`${API_URL}${path}`, { headers: { Accept: 'text/csv' } })
+  } catch {
+    throw new AppError('Não foi possível conectar à API. Inicie o backend e execute o seed.', 503)
+  }
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({} as ApiError)) as ApiError
+    throw new AppError(body.error ?? body.detail ?? 'Não foi possível exportar a listagem.', response.status)
+  }
+  return response.blob()
+}
+
 function hasFilters(filtros: FiltrosTransacao): boolean {
   return Boolean(filtros.from || filtros.to || filtros.tipo || filtros.categoriaId || filtros.minValor || filtros.maxValor)
 }
@@ -153,6 +178,10 @@ class HttpFinanceClient implements FinanceClient {
 
   async excluirTransacao(id: string): Promise<void> {
     await request<void>(`/transacoes/${id}`, { method: 'DELETE' })
+  }
+
+  async exportarTransacoes(filtros: FiltrosTransacao = {}): Promise<Blob> {
+    return requestCsv(`/transacoes/export${queryFiltros(filtros)}`)
   }
 
   async obterResumo(ano: number, mes: number): Promise<ResumoMensal> {

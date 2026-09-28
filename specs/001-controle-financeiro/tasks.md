@@ -152,7 +152,7 @@ description: "Task list for Controle Financeiro Pessoal — donos do grupo em ca
 **Independent Test**: filtrar, baixar, abrir no Excel
 
 - [ ] T040 [US7] [João] (se combinado) dados para export no servidor — ou Duda usa a mesma query
-- [ ] T041 [US7] [Duda] FastAPI `GET /transacoes/export` (`text/csv`) + botão na listagem
+- [x] T041 [US7] [Duda] FastAPI `GET /transacoes/export` (`text/csv`) + botão na listagem
 - [ ] T042 [US7] [Natalia] QA: filtros da tela = linhas do arquivo; cabeçalho ok
 
 **Checkpoint**: extra do roadmap (CSV) entregue; PDF continua fora
