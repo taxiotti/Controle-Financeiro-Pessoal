@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronLeft, ChevronRight, Filter, Pencil, Plus, ReceiptText, Trash2, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, Filter, Pencil, Plus, ReceiptText, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { useSearchParams } from 'react-router-dom'
@@ -173,6 +173,21 @@ export function TransacoesPage() {
     },
   })
 
+  const exportMutation = useMutation({
+    mutationFn: () => financeClient.exportarTransacoes(filters),
+    onSuccess: (csv) => {
+      const downloadUrl = URL.createObjectURL(csv)
+      const link = document.createElement('a')
+      link.href = downloadUrl
+      link.download = 'transacoes.csv'
+      document.body.append(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(downloadUrl)
+      showNotice('CSV baixado com os filtros atuais')
+    },
+  })
+
   const pageCount = Math.max(1, Math.ceil((transactions.data?.total ?? 0) / 20))
 
   return (
@@ -198,9 +213,13 @@ export function TransacoesPage() {
       <section className="panel table-panel">
         <div className="panel-heading">
           <div><h2>Histórico</h2><p>{transactions.data?.total ?? 0} lançamento(s) encontrado(s)</p></div>
+          <button className="secondary-button" type="button" onClick={() => exportMutation.mutate()} disabled={exportMutation.isPending || transactions.isPending || !transactions.data?.total}>
+            <Download size={16} /> {exportMutation.isPending ? 'Baixando…' : 'Baixar CSV'}
+          </button>
         </div>
         {transactions.isPending && <div className="loading-state">Carregando transações…</div>}
         {transactions.isError && <div className="alert error">Não foi possível carregar as transações.</div>}
+        {exportMutation.isError && <div className="alert error">{exportMutation.error.message}</div>}
         {transactions.data?.items.length === 0 && <div className="empty-state"><ReceiptText /><h3>Nenhum lançamento neste período</h3><p>Ajuste os filtros ou cadastre uma nova transação.</p></div>}
         {!!transactions.data?.items.length && (
           <div className="responsive-table">
