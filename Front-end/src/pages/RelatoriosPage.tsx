@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { BarChart3 } from 'lucide-react'
 import { Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useSearchParams } from 'react-router-dom'
-import { financeClient } from '../api/localClient'
+import { financeClient } from '../api/httpClient'
 import type { TipoTransacao } from '../api/types'
 import { currentMonth, decimalToCents, formatMoney, monthLabel, shortMonthLabel } from '../lib/format'
 
