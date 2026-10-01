@@ -1,64 +1,38 @@
-# Clarus — Front-end
+# Front-end — Controle Financeiro Pessoal
 
-SPA de controle financeiro pessoal guiada pelas specs em
-`specs/001-controle-financeiro/`.
+Dashboard React + Vite do Controle Financeiro Pessoal.
 
-## Executar
+## Entregas desta tela
 
-Requisitos: Node.js 20+ e npm.
+- Cards de receitas, despesas e saldo do mês selecionado.
+- Gráfico de pizza agrupado por categoria de despesa, com tabela equivalente para acessibilidade.
+- Gráfico de linha com a evolução de receitas e despesas nos seis meses exibidos.
+- Comparativo nominal entre o mês selecionado e o mês anterior.
+- Layout responsivo para desktop e mobile, incluindo cards, gráficos, tabela de lançamentos e modal de novo lançamento.
+
+## Integração com o backend existente
+
+A tela usa `VITE_API_URL` (padrão `http://localhost:8000/api`) e consome apenas as rotas já disponíveis:
+
+- `GET /categorias`
+- `GET /transacoes?page=...&pageSize=...`
+- `POST /transacoes`
+
+O cliente percorre as páginas de transações antes de calcular os totais e agrupamentos no front. Assim, o resumo não depende apenas da página atualmente visível. Quando a API está indisponível, a tela exibe um alerta e mantém os estados vazios sem quebrar.
+
+## Desenvolvimento e validação
 
 ```bash
 npm install
 npm run dev
-```
-
-O Vite informa a URL local, normalmente `http://localhost:5173`.
-
-Em outro terminal, suba o backend e carregue as categorias padrão:
-
-```bash
-cd ../backend
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-python -m app.seed
-uvicorn app.main:app --reload
-```
-
-Por padrão, o frontend usa `http://localhost:8000/api`. Para outro endereço,
-crie `Front-end/.env.local` com `VITE_API_URL=http://servidor:porta/api`.
-
-## Verificações
-
-```bash
-npm run lint
-npm test
 npm run build
+npm run lint
 ```
 
-## Escopo atual
+Crie `Front-end/.env` se a API estiver em outro endereço:
 
-- US1: categorias padrão e CRUD de categorias customizadas.
-- US2: CRUD e paginação de transações.
-- US3: resumo do mês corrente.
-- US4: filtros persistidos na URL.
-- US5: pizza por categoria, evolução mensal e comparativo.
-- UI em português, BRL, datas brasileiras e layout responsivo.
+```bash
+VITE_API_URL=http://localhost:8000/api
+```
 
-## Integração com API
-
-As páginas usam `src/api/httpClient.ts`, que chama o backend FastAPI nos
-endpoints de categorias e transações. Os tipos em `src/api/types.ts` seguem
-`specs/001-controle-financeiro/contracts/openapi.yaml`.
-
-O backend atual ainda não disponibiliza filtros nem endpoints de relatórios.
-Enquanto isso, o cliente busca as páginas de transações da API e aplica os
-filtros e agregações necessários para manter o dashboard e os gráficos
-coerentes com os dados do servidor.
-
-## Limites
-
-Autenticação, isolamento real entre usuários, CSV, filtros no servidor e
-endpoints de relatórios ainda não foram implementados. O backend usa o usuário
-de desenvolvimento definido em sua configuração; não deve ser tratado como
-proteção de dados financeiros.
+Os gráficos também apresentam dados em tabelas ocultas para leitor de tela e os estados vazios são tratados explicitamente.
