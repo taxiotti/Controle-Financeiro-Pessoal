@@ -1,17 +1,17 @@
 
+from typing import Annotated
 import csv
 from datetime import date
 from decimal import Decimal
 from io import StringIO
 from typing import Annotated, Literal
 from uuid import UUID
-
+import io
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
-
-from app.api.v1.endpoints.categorias import get_usuario_atual
 from app.core.database import get_db
+from app.core.security import get_usuario_atual
 from app.models import Categoria, Transacao, Usuario
 from app.schemas.categoria import CategoriaResponse
 from app.schemas.transacao import PaginaTransacoes, TransacaoInput, TransacaoResponse
@@ -44,6 +44,15 @@ def buscar_transacao(db: Session, id: UUID, usuario: Usuario) -> Transacao:
     if transacao is None:
         raise HTTPException(404, "Transação não encontrada.")
     return transacao
+
+
+def listar_transacoes_usuario(usuario: Usuario):
+    return (
+        select(Transacao, Categoria)
+        .join(Categoria, Categoria.id == Transacao.categoria_id)
+        .where(Transacao.usuario_id == usuario.id)
+        .order_by(Transacao.data.desc(), Transacao.criado_em.desc(), Transacao.id)
+    )
 
 
 def para_resposta(
@@ -101,51 +110,92 @@ def parametros_filtros(
 ):
     return data_inicial, data_final, tipo, categoria_id, valor_minimo, valor_maximo
 
-
 @router.get("", response_model=PaginaTransacoes)
 def listar(
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(alias="pageSize", ge=1, le=100)] = 20,
-    filtros: tuple[date | None, date | None, Literal["receita", "despesa"] | None, UUID | None, Decimal | None, Decimal | None] = Depends(parametros_filtros),
+    filtros: tuple[
+        date | None,
+        date | None,
+        Literal["receita", "despesa"] | None,
+        UUID | None,
+        Decimal | None,
+        Decimal | None
+    ] = Depends(parametros_filtros),
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_usuario_atual),
 ):
     criterios = criterios_filtrados(usuario, *filtros)
     base = select(Transacao).where(*criterios)
-    total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
+    total = db.scalar(
+        select(func.count()).select_from(base.subquery())
+    ) or 0
     rows = db.execute(
         select(Transacao, Categoria)
         .join(Categoria, Categoria.id == Transacao.categoria_id)
         .where(*criterios)
-        .order_by(Transacao.data.desc(), Transacao.criado_em.desc(), Transacao.id)
+        .order_by(
+            Transacao.data.desc(),
+            Transacao.criado_em.desc(),
+            Transacao.id
+        )
         .offset((page - 1) * page_size)
         .limit(page_size)
     ).all()
+
     return PaginaTransacoes(
-        items=[para_resposta(transacao, categoria) for transacao, categoria in rows],
+        items=[
+            para_resposta(transacao, categoria)
+            for transacao, categoria in rows
+        ],
         total=total,
         page=page,
         page_size=page_size,
     )
 
-
 @router.get("/export", response_class=Response)
 def exportar(
-    filtros: tuple[date | None, date | None, Literal["receita", "despesa"] | None, UUID | None, Decimal | None, Decimal | None] = Depends(parametros_filtros),
+    filtros: tuple[
+        date | None,
+        date | None,
+        Literal["receita", "despesa"] | None,
+        UUID | None,
+        Decimal | None,
+        Decimal | None
+    ] = Depends(parametros_filtros),
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_usuario_atual),
 ):
     criterios = criterios_filtrados(usuario, *filtros)
+
     rows = db.execute(
         select(Transacao, Categoria)
         .join(Categoria, Categoria.id == Transacao.categoria_id)
         .where(*criterios)
-        .order_by(Transacao.data.desc(), Transacao.criado_em.desc(), Transacao.id)
+        .order_by(
+            Transacao.data.desc(),
+            Transacao.criado_em.desc(),
+            Transacao.id
+        )
     ).all()
 
     stream = StringIO(newline="")
-    writer = csv.writer(stream, delimiter=";", lineterminator="\r\n")
-    writer.writerow(["Descrição", "Data", "Categoria", "Tipo", "Valor"])
+    stream.write("\ufeff")
+
+    writer = csv.writer(
+        stream,
+        delimiter=";",
+        lineterminator="\r\n"
+    )
+
+    writer.writerow([
+        "Descrição",
+        "Data",
+        "Categoria",
+        "Tipo",
+        "Valor"
+    ])
+
     for transacao, categoria in rows:
         writer.writerow([
             transacao.descricao,
@@ -156,12 +206,13 @@ def exportar(
         ])
 
     return Response(
-        content=f"\ufeff{stream.getvalue()}",
+        content=stream.getvalue().encode("utf-8"),
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": "attachment; filename=transacoes.csv"},
+        headers={
+            "Content-Disposition": 'attachment; filename="transacoes.csv"'
+        },
     )
-
-
+  
 @router.post("", response_model=TransacaoResponse, status_code=201)
 def criar(
     payload: TransacaoInput,

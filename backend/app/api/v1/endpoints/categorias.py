@@ -6,22 +6,12 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.database import get_db
+from app.core.security import get_usuario_atual
 from app.models import Categoria, Transacao, Usuario
 from app.schemas.categoria import CategoriaInput, CategoriaResponse
 
 router = APIRouter()
-
-
-def get_usuario_atual(db: Session = Depends(get_db)) -> Usuario:
-    # Usuário implícito permitido pelo quickstart até a implementação da US6.
-    usuario = db.scalar(select(Usuario).where(
-        Usuario.email == settings.dev_user_email.strip().lower(),
-    ))
-    if usuario is None:
-        raise HTTPException(503, "Usuário de desenvolvimento ausente. Execute python -m app.seed.")
-    return usuario
 
 
 def buscar_categoria(db: Session, id: UUID, usuario: Usuario) -> Categoria:

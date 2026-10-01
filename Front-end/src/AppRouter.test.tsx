@@ -3,11 +3,18 @@ import '@testing-library/jest-dom/vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import AppRouter from './AppRouter'
+import { setSessao } from './lib/session'
 
 describe('application routes', () => {
-  beforeEach(() => localStorage.clear())
+  beforeEach(() => {
+    localStorage.clear()
+    setSessao('token-de-teste', { id: '10000000-0000-4000-8000-000000000001', nome: 'Usuário Teste', email: 'teste@example.com' })
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: '10000000-0000-4000-8000-000000000001', nome: 'Usuário Teste', email: 'teste@example.com' }), { status: 200, headers: { 'Content-Type': 'application/json' } })))
+  })
+
+  afterEach(() => vi.unstubAllGlobals())
 
   it('abre o dashboard com resumo vazio', async () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })

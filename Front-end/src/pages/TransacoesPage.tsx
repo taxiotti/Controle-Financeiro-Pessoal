@@ -9,6 +9,7 @@ import { transacaoFormSchema } from '../api/schemas'
 import type { TransacaoFormValues } from '../api/schemas'
 import type { Categoria, FiltrosTransacao, TipoTransacao, Transacao, TransacaoInput } from '../api/types'
 import { currentMonth, formatDate, formatMoney, monthBounds, todayInSaoPaulo } from '../lib/format'
+import { ApiError, api } from '../lib/api-client'
 
 function defaultPeriod() {
   const { ano, mes } = currentMonth()
@@ -190,11 +191,25 @@ export function TransacoesPage() {
 
   const pageCount = Math.max(1, Math.ceil((transactions.data?.total ?? 0) / 20))
 
+  async function exportarCsv() {
+    try {
+      const arquivo = await api.exportarCsv()
+      const url = URL.createObjectURL(arquivo)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'transacoes.csv'
+      link.click()
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      showNotice(error instanceof ApiError && error.status === 401 ? 'Sessão expirada. Entre novamente.' : 'Não foi possível exportar o CSV.')
+    }
+  }
+
   return (
     <div className="page">
       <section className="page-heading">
         <div><p className="eyebrow">US2 E US4 · HISTÓRICO</p><h1>Transações</h1><p className="subtitle">Registre e encontre cada entrada e saída do seu dinheiro.</p></div>
-        <button className="primary-button" type="button" onClick={() => updateSearch({ novo: '1' })}><Plus size={17} /> Novo lançamento</button>
+        <div className="page-actions"><button className="secondary-button" type="button" onClick={exportarCsv}><Download size={16} /> Exportar CSV</button><button className="primary-button" type="button" onClick={() => updateSearch({ novo: '1' })}><Plus size={17} /> Novo lançamento</button></div>
       </section>
 
       <form className="panel filter-panel" onSubmit={applyFilters}>
