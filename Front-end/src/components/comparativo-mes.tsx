@@ -1,4 +1,4 @@
-import { formatMoney, formatSignedMoney } from '../lib/utils'
+import { decimalToCents, formatMoney } from '../lib/format'
 import type { MonthlySummary } from './resumo-cards'
 
 type ComparativoMesProps = {
@@ -8,8 +8,17 @@ type ComparativoMesProps = {
   previousLabel: string
 }
 
-function comparisonTone(value: number, invert = false): string {
-  const positive = invert ? value < 0 : value >= 0
+function asCents(value: string | number): number {
+  return decimalToCents(value)
+}
+
+function formatSignedDelta(cents: number): string {
+  const sign = cents >= 0 ? '+' : '−'
+  return `${sign} ${formatMoney(Math.abs(cents) / 100)}`
+}
+
+function comparisonTone(cents: number, invert = false): string {
+  const positive = invert ? cents < 0 : cents >= 0
   return positive ? 'comparison-positive' : 'comparison-negative'
 }
 
@@ -29,17 +38,19 @@ export function ComparativoMes({ current, previous, currentLabel, previousLabel 
         </div>
       </div>
       <div className="comparison-head">
-        <span>Indicador</span><strong>{currentLabel}</strong><strong>{previousLabel}</strong>
+        <span>Indicador</span>
+        <strong>{currentLabel}</strong>
+        <strong>{previousLabel}</strong>
       </div>
       <div className="comparison-rows">
         {rows.map((row) => {
-          const delta = row.current - row.previous
+          const delta = asCents(row.current) - asCents(row.previous)
           return (
             <div className="comparison-row" key={row.label}>
               <span>{row.label}</span>
               <strong>{formatMoney(row.current)}</strong>
               <span className="previous-value">{formatMoney(row.previous)}</span>
-              <small className={comparisonTone(delta, row.invert)}>{formatSignedMoney(delta)}</small>
+              <small className={comparisonTone(delta, row.invert)}>{formatSignedDelta(delta)}</small>
             </div>
           )
         })}

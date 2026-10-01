@@ -1,4 +1,4 @@
-import { formatMoney } from '../lib/utils'
+import { formatMoney } from '../lib/format'
 
 export type EvolutionPoint = {
   key: string
@@ -9,6 +9,7 @@ export type EvolutionPoint = {
 
 type GraficoLinhaProps = {
   data: EvolutionPoint[]
+  subtitle?: string
 }
 
 function linePath(values: number[], max: number): string {
@@ -22,17 +23,17 @@ function linePath(values: number[], max: number): string {
   }).join(' ')
 }
 
-export function GraficoLinha({ data }: GraficoLinhaProps) {
+export function GraficoLinha({ data, subtitle = 'Receitas e despesas dos últimos meses' }: GraficoLinhaProps) {
   const max = Math.max(...data.flatMap((item) => [item.income, item.expenses]), 1)
   const incomePath = linePath(data.map((item) => item.income), max)
   const expensePath = linePath(data.map((item) => item.expenses), max)
 
   return (
-    <article className="panel line-panel">
+    <article className="panel line-panel chart-card line-chart-card">
       <div className="panel-heading">
         <div>
           <h2>Evolução mensal</h2>
-          <p>Receitas e despesas dos últimos meses</p>
+          <p>{subtitle}</p>
         </div>
         <div className="legend" aria-label="Legenda do gráfico">
           <span><i className="income-dot" />Receitas</span>
@@ -50,7 +51,9 @@ export function GraficoLinha({ data }: GraficoLinhaProps) {
         <>
           <div className="line-chart-wrap">
             <div className="line-axis" aria-hidden="true">
-              <span>{formatMoney(max)}</span><span>{formatMoney(max / 2)}</span><span>R$ 0</span>
+              <span>{formatMoney(max)}</span>
+              <span>{formatMoney(max / 2)}</span>
+              <span>R$ 0</span>
             </div>
             <div className="line-chart-area">
               <div className="line-grid grid-top" />
@@ -71,14 +74,26 @@ export function GraficoLinha({ data }: GraficoLinhaProps) {
                   )
                 })}
               </svg>
-              <div className="chart-days">{data.map((item) => <span key={item.key}>{item.label}</span>)}</div>
+              <div className="chart-days">
+                {data.map((item) => <span key={item.key}>{item.label}</span>)}
+              </div>
             </div>
           </div>
 
           <table className="sr-only">
             <caption>Dados da evolução mensal</caption>
-            <thead><tr><th>Mês</th><th>Receitas</th><th>Despesas</th></tr></thead>
-            <tbody>{data.map((item) => <tr key={item.key}><td>{item.label}</td><td>{formatMoney(item.income)}</td><td>{formatMoney(item.expenses)}</td></tr>)}</tbody>
+            <thead>
+              <tr><th>Mês</th><th>Receitas</th><th>Despesas</th></tr>
+            </thead>
+            <tbody>
+              {data.map((item) => (
+                <tr key={item.key}>
+                  <td>{item.label}</td>
+                  <td>{formatMoney(item.income)}</td>
+                  <td>{formatMoney(item.expenses)}</td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </>
       )}
