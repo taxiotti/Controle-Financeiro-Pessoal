@@ -1,12 +1,15 @@
-from typing import Annotated
-from uuid import UUID
 
+from typing import Annotated
 import csv
+from datetime import date
+from decimal import Decimal
+from io import StringIO
+from typing import Annotated, Literal
+from uuid import UUID
 import io
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
-
 from app.core.database import get_db
 from app.core.security import get_usuario_atual
 from app.models import Categoria, Transacao, Usuario
@@ -67,51 +70,149 @@ def para_resposta(
     )
 
 
+def criterios_filtrados(
+    usuario: Usuario,
+    data_inicial: date | None,
+    data_final: date | None,
+    tipo: Literal["receita", "despesa"] | None,
+    categoria_id: UUID | None,
+    valor_minimo: Decimal | None,
+    valor_maximo: Decimal | None,
+):
+    if data_inicial and data_final and data_inicial > data_final:
+        raise HTTPException(400, "A data inicial não pode ser posterior à data final.")
+    if valor_minimo is not None and valor_maximo is not None and valor_minimo > valor_maximo:
+        raise HTTPException(400, "O valor mínimo não pode ser maior que o valor máximo.")
+
+    filtros = [Transacao.usuario_id == usuario.id]
+    if data_inicial:
+        filtros.append(Transacao.data >= data_inicial)
+    if data_final:
+        filtros.append(Transacao.data <= data_final)
+    if tipo:
+        filtros.append(Transacao.tipo == tipo)
+    if categoria_id:
+        filtros.append(Transacao.categoria_id == str(categoria_id))
+    if valor_minimo is not None:
+        filtros.append(Transacao.valor >= valor_minimo)
+    if valor_maximo is not None:
+        filtros.append(Transacao.valor <= valor_maximo)
+    return filtros
+
+
+def parametros_filtros(
+    data_inicial: Annotated[date | None, Query(alias="from")] = None,
+    data_final: Annotated[date | None, Query(alias="to")] = None,
+    tipo: Annotated[Literal["receita", "despesa"] | None, Query()] = None,
+    categoria_id: Annotated[UUID | None, Query(alias="categoriaId")] = None,
+    valor_minimo: Annotated[Decimal | None, Query(alias="minValor", ge=0)] = None,
+    valor_maximo: Annotated[Decimal | None, Query(alias="maxValor", ge=0)] = None,
+):
+    return data_inicial, data_final, tipo, categoria_id, valor_minimo, valor_maximo
+
 @router.get("", response_model=PaginaTransacoes)
 def listar(
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(alias="pageSize", ge=1, le=100)] = 20,
+    filtros: tuple[
+        date | None,
+        date | None,
+        Literal["receita", "despesa"] | None,
+        UUID | None,
+        Decimal | None,
+        Decimal | None
+    ] = Depends(parametros_filtros),
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_usuario_atual),
 ):
-    base = select(Transacao).where(Transacao.usuario_id == usuario.id)
-    total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
+    criterios = criterios_filtrados(usuario, *filtros)
+    base = select(Transacao).where(*criterios)
+    total = db.scalar(
+        select(func.count()).select_from(base.subquery())
+    ) or 0
     rows = db.execute(
-        listar_transacoes_usuario(usuario).offset((page - 1) * page_size).limit(page_size)
+        select(Transacao, Categoria)
+        .join(Categoria, Categoria.id == Transacao.categoria_id)
+        .where(*criterios)
+        .order_by(
+            Transacao.data.desc(),
+            Transacao.criado_em.desc(),
+            Transacao.id
+        )
+        .offset((page - 1) * page_size)
+        .limit(page_size)
     ).all()
+
     return PaginaTransacoes(
-        items=[para_resposta(transacao, categoria) for transacao, categoria in rows],
+        items=[
+            para_resposta(transacao, categoria)
+            for transacao, categoria in rows
+        ],
         total=total,
         page=page,
         page_size=page_size,
     )
 
-
-@router.get("/export")
+@router.get("/export", response_class=Response)
 def exportar(
+    filtros: tuple[
+        date | None,
+        date | None,
+        Literal["receita", "despesa"] | None,
+        UUID | None,
+        Decimal | None,
+        Decimal | None
+    ] = Depends(parametros_filtros),
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_usuario_atual),
 ):
-    rows = db.execute(listar_transacoes_usuario(usuario)).all()
-    buffer = io.StringIO()
-    buffer.write("\ufeff")
-    writer = csv.writer(buffer, delimiter=";", lineterminator="\r\n")
-    writer.writerow(["Data", "Tipo", "Descrição", "Valor", "Categoria"])
-    for transacao, categoria in rows:
-        writer.writerow([
-            transacao.data.strftime("%d/%m/%Y"),
-            transacao.tipo,
-            transacao.descricao,
-            f"{transacao.valor:.2f}".replace(".", ","),
-            categoria.nome,
-        ])
-    return Response(
-        content=buffer.getvalue().encode("utf-8"),
-        media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": 'attachment; filename="transacoes.csv"'},
+    criterios = criterios_filtrados(usuario, *filtros)
+
+    rows = db.execute(
+        select(Transacao, Categoria)
+        .join(Categoria, Categoria.id == Transacao.categoria_id)
+        .where(*criterios)
+        .order_by(
+            Transacao.data.desc(),
+            Transacao.criado_em.desc(),
+            Transacao.id
+        )
+    ).all()
+
+    stream = StringIO(newline="")
+    stream.write("\ufeff")
+
+    writer = csv.writer(
+        stream,
+        delimiter=";",
+        lineterminator="\r\n"
     )
 
+    writer.writerow([
+        "Descrição",
+        "Data",
+        "Categoria",
+        "Tipo",
+        "Valor"
+    ])
 
+    for transacao, categoria in rows:
+        writer.writerow([
+            transacao.descricao,
+            transacao.data.strftime("%d/%m/%Y"),
+            categoria.nome,
+            "Receita" if transacao.tipo == "receita" else "Despesa",
+            f"{transacao.valor:.2f}".replace(".", ","),
+        ])
+
+    return Response(
+        content=stream.getvalue().encode("utf-8"),
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": 'attachment; filename="transacoes.csv"'
+        },
+    )
+  
 @router.post("", response_model=TransacaoResponse, status_code=201)
 def criar(
     payload: TransacaoInput,

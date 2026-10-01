@@ -1,49 +1,38 @@
-# Clarus — Front-end
+# Front-end — Controle Financeiro Pessoal
 
-SPA de controle financeiro pessoal guiada pelas specs em
-`specs/001-controle-financeiro/`.
+Dashboard React + Vite do Controle Financeiro Pessoal.
 
-## Executar
+## Entregas desta tela
 
-Requisitos: Node.js 20+ e npm.
+- Cards de receitas, despesas e saldo do mês selecionado.
+- Gráfico de pizza agrupado por categoria de despesa, com tabela equivalente para acessibilidade.
+- Gráfico de linha com a evolução de receitas e despesas nos seis meses exibidos.
+- Comparativo nominal entre o mês selecionado e o mês anterior.
+- Layout responsivo para desktop e mobile, incluindo cards, gráficos, tabela de lançamentos e modal de novo lançamento.
+
+## Integração com o backend existente
+
+A tela usa `VITE_API_URL` (padrão `http://localhost:8000/api`) e consome apenas as rotas já disponíveis:
+
+- `GET /categorias`
+- `GET /transacoes?page=...&pageSize=...`
+- `POST /transacoes`
+
+O cliente percorre as páginas de transações antes de calcular os totais e agrupamentos no front. Assim, o resumo não depende apenas da página atualmente visível. Quando a API está indisponível, a tela exibe um alerta e mantém os estados vazios sem quebrar.
+
+## Desenvolvimento e validação
 
 ```bash
 npm install
 npm run dev
+npm run build
+npm run lint
 ```
 
-O Vite informa a URL local, normalmente `http://localhost:5173`.
-
-## Verificações
+Crie `Front-end/.env` se a API estiver em outro endereço:
 
 ```bash
-npm run lint
-npm test
-npm run build
+VITE_API_URL=http://localhost:8000/api
 ```
 
-## Escopo atual
-
-- US1: categorias padrão e CRUD de categorias customizadas.
-- US2: CRUD e paginação de transações.
-- US3: resumo do mês corrente.
-- US4: filtros persistidos na URL.
-- US5: pizza por categoria, evolução mensal e comparativo.
-- UI em português, BRL, datas brasileiras e layout responsivo.
-
-## Dados locais
-
-Esta etapa não possui backend. O adapter em `src/api/localClient.ts` grava
-categorias e transações na chave versionada `cfp:v1:data` do `localStorage`.
-Limpar os dados do site recria as nove categorias padrão.
-
-Os tipos em `src/api/types.ts` seguem
-`specs/001-controle-financeiro/contracts/openapi.yaml`. Quando a API FastAPI
-estiver pronta, um adapter HTTP poderá substituir o cliente local sem mudar
-as páginas.
-
-## Limites
-
-Autenticação, isolamento real entre usuários, CSV e o serviço FastAPI ainda
-não foram implementados. O armazenamento local serve para desenvolvimento e
-demonstração; não deve ser tratado como proteção de dados financeiros.
+Os gráficos também apresentam dados em tabelas ocultas para leitor de tela e os estados vazios são tratados explicitamente.

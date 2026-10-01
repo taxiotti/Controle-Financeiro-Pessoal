@@ -169,3 +169,26 @@ def test_parametros_e_ids_invalidos(api):
     assert client.get("/api/transacoes?pageSize=101").status_code == 400
     assert client.patch("/api/transacoes/not-a-uuid", json=payload(despesa["id"])).status_code == 400
     assert client.delete("/api/transacoes/not-a-uuid").status_code == 400
+
+
+def test_exportacao_csv_respeita_filtros(api):
+    client, _ = api
+    ids = categorias(client)
+    despesa = ids["despesa"]
+    receita = ids["receita"]
+    client.post("/api/transacoes", json=payload(
+        despesa["id"], descricao="Mercado; semanal", valor=42.75, data="2026-09-20",
+    ))
+    client.post("/api/transacoes", json=payload(
+        receita["id"], tipo="receita", descricao="Salário", valor=2500, data="2026-09-21",
+    ))
+
+    resposta = client.get(f"/api/transacoes/export?tipo=despesa&categoriaId={despesa['id']}")
+
+    assert resposta.status_code == 200
+    assert resposta.headers["content-type"].startswith("text/csv")
+    assert resposta.headers["content-disposition"] == "attachment; filename=transacoes.csv"
+    assert resposta.content.decode("utf-8-sig") == (
+        "Descrição;Data;Categoria;Tipo;Valor\r\n"
+        f'"Mercado; semanal";20/09/2026;{despesa["nome"]};Despesa;42,75\r\n'
+    )

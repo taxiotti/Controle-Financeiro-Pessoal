@@ -7,7 +7,7 @@ import {
 import type { LucideIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { financeClient } from '../api/localClient'
+import { financeClient } from '../api/httpClient'
 import { categoriaSchema } from '../api/schemas'
 import type { CategoriaFormValues } from '../api/schemas'
 import type { Categoria } from '../api/types'

@@ -250,4 +250,6 @@ class LocalFinanceClient implements FinanceClient {
   }
 }
 
-export const financeClient: FinanceClient = new LocalFinanceClient()
+export const localFinanceClient: FinanceClient = new LocalFinanceClient()
+/** @deprecated Use `financeClient` from `./client` (HTTP). Kept for unit tests. */
+export const financeClient = localFinanceClient

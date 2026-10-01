@@ -71,4 +71,18 @@ describe('local finance client', () => {
     expect(page.items).toHaveLength(5)
     await expect(financeClient.excluirCategoria(category.id)).rejects.toThrow('vinculada')
   })
+
+  it('exporta todas as transações filtradas em CSV compatível com Excel', async () => {
+    const categories = await financeClient.listarCategorias()
+    const food = categories.find((category) => category.nome === 'Alimentação')!
+    const salary = categories.find((category) => category.nome === 'Salário')!
+    await financeClient.criarTransacao({ tipo: 'despesa', valor: 12.5, descricao: 'Mercado; semanal', data: '2026-09-20', categoriaId: food.id })
+    await financeClient.criarTransacao({ tipo: 'receita', valor: 2000, descricao: 'Salário', data: '2026-09-21', categoriaId: salary.id })
+
+    const csv = await financeClient.exportarTransacoes({ tipo: 'despesa' })
+
+    await expect(csv.text()).resolves.toBe(
+      '\ufeffDescrição;Data;Categoria;Tipo;Valor\r\n"Mercado; semanal";20/09/2026;Alimentação;Despesa;12,50\r\n',
+    )
+  })
 })

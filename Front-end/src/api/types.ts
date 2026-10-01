@@ -87,6 +87,7 @@ export interface FinanceClient {
   criarTransacao(input: TransacaoInput): Promise<Transacao>
   atualizarTransacao(id: string, input: TransacaoInput): Promise<Transacao>
   excluirTransacao(id: string): Promise<void>
+  exportarTransacoes(filtros?: FiltrosTransacao): Promise<Blob>
   obterResumo(ano: number, mes: number): Promise<ResumoMensal>
   obterPizza(ano: number, mes: number, tipo: TipoTransacao): Promise<FatiaPizza[]>
   obterEvolucao(meses?: number): Promise<PontoEvolucao[]>
