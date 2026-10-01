@@ -1,33 +1,13 @@
-import type { Category, Transaction, TransactionInput, TransactionPage } from '../types/finance'
+import { httpFinanceClient } from '../api/httpClient'
+import type { TransacaoInput } from '../api/types'
 
-const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api').replace(/\/$/, '')
+/** Helpers legado; o app usa `financeClient` de `api/client`. */
+export const getCategories = () => httpFinanceClient.listarCategorias()
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  })
+export const getTransactionPage = (page = 1, pageSize = 100) =>
+  httpFinanceClient.listarTransacoes({ page, pageSize })
 
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({})) as { error?: string }
-    throw new Error(body.error ?? `Não foi possível acessar a API (${response.status}).`)
-  }
-
-  return response.json() as Promise<T>
-}
-
-export async function getCategories(): Promise<Category[]> {
-  return request<Category[]>('/categorias')
-}
-
-export async function getTransactionPage(
-  page = 1,
-  pageSize = 100,
-): Promise<TransactionPage> {
-  return request<TransactionPage>(`/transacoes?page=${page}&pageSize=${pageSize}`)
-}
-
-export async function getAllTransactions(): Promise<Transaction[]> {
+export async function getAllTransactions() {
   const firstPage = await getTransactionPage()
   const pages = [firstPage]
   const totalPages = Math.ceil(firstPage.total / firstPage.pageSize)
@@ -39,9 +19,5 @@ export async function getAllTransactions(): Promise<Transaction[]> {
   return pages.flatMap((page) => page.items)
 }
 
-export async function createTransaction(input: TransactionInput): Promise<Transaction> {
-  return request<Transaction>('/transacoes', {
-    method: 'POST',
-    body: JSON.stringify(input),
-  })
-}
+export const createTransaction = (input: TransacaoInput) =>
+  httpFinanceClient.criarTransacao(input)
