@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Download, Filter, Pencil, Plus, ReceiptText,
 import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { useSearchParams } from 'react-router-dom'
-import { financeClient } from '../api/httpClient'
+import { financeClient } from '../api/client'
 import { transacaoFormSchema } from '../api/schemas'
 import type { TransacaoFormValues } from '../api/schemas'
 import type { Categoria, FiltrosTransacao, TipoTransacao, Transacao, TransacaoInput } from '../api/types'
