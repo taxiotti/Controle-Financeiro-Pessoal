@@ -17,6 +17,22 @@ import { centsToDecimal, decimalToCents } from '../lib/format'
 
 const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api').replace(/\/$/, '')
 
+function queryFiltros(filtros: FiltrosTransacao): string {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries({
+    from: filtros.from,
+    to: filtros.to,
+    tipo: filtros.tipo,
+    categoriaId: filtros.categoriaId,
+    minValor: filtros.minValor?.replace(',', '.'),
+    maxValor: filtros.maxValor?.replace(',', '.'),
+  })) {
+    if (value !== undefined && value !== '') params.set(key, String(value))
+  }
+  const query = params.toString()
+  return query ? `?${query}` : ''
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     headers: { 'Content-Type': 'application/json', ...(options?.headers ?? {}) },
@@ -32,6 +48,14 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   }
 
   return body as T
+}
+
+async function requestCsv(path: string): Promise<Blob> {
+  const response = await fetch(`${API_URL}${path}`, { headers: { Accept: 'text/csv' } })
+  if (response.ok) return response.blob()
+
+  const body = await response.json().catch(() => ({})) as { error?: string; detail?: string }
+  throw new AppError(body.error ?? body.detail ?? 'Não foi possível exportar a listagem.', response.status)
 }
 
 function asString(value: string | number): string {
@@ -143,6 +167,10 @@ export class HttpFinanceClient implements FinanceClient {
 
   async excluirTransacao(id: string): Promise<void> {
     await request<void>(`/transacoes/${id}`, { method: 'DELETE' })
+  }
+
+  async exportarTransacoes(filtros: FiltrosTransacao = {}): Promise<Blob> {
+    return requestCsv(`/transacoes/export${queryFiltros(filtros)}`)
   }
 
   async obterResumo(ano: number, mes: number): Promise<ResumoMensal> {

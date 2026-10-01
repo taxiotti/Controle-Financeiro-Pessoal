@@ -109,6 +109,37 @@ function summarize(transactions: Transacao[], ano: number, mes: number): ResumoM
   }
 }
 
+function filtrarTransacoes(transacoes: Transacao[], filtros: FiltrosTransacao): Transacao[] {
+  const min = filtros.minValor ? decimalToCents(filtros.minValor) : undefined
+  const max = filtros.maxValor ? decimalToCents(filtros.maxValor) : undefined
+  return transacoes
+    .filter((item) => !filtros.from || item.data >= filtros.from)
+    .filter((item) => !filtros.to || item.data <= filtros.to)
+    .filter((item) => !filtros.tipo || item.tipo === filtros.tipo)
+    .filter((item) => !filtros.categoriaId || item.categoriaId === filtros.categoriaId)
+    .filter((item) => min === undefined || decimalToCents(item.valor) >= min)
+    .filter((item) => max === undefined || decimalToCents(item.valor) <= max)
+    .sort((a, b) => b.data.localeCompare(a.data) || b.id.localeCompare(a.id))
+}
+
+function csvField(value: string): string {
+  return /[;"\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value
+}
+
+function csvDasTransacoes(transacoes: Transacao[]): Blob {
+  const lines = [
+    ['Descrição', 'Data', 'Categoria', 'Tipo', 'Valor'],
+    ...transacoes.map((transacao) => [
+      transacao.descricao,
+      transacao.data.split('-').reverse().join('/'),
+      transacao.categoria?.nome ?? 'Sem categoria',
+      transacao.tipo === 'receita' ? 'Receita' : 'Despesa',
+      transacao.valor.replace('.', ','),
+    ]),
+  ].map((row) => row.map(csvField).join(';'))
+  return new Blob([`\ufeff${lines.join('\r\n')}\r\n`], { type: 'text/csv;charset=utf-8' })
+}
+
 class LocalFinanceClient implements FinanceClient {
   async listarCategorias(): Promise<Categoria[]> {
     return loadDatabase().categorias.sort((a, b) => Number(b.padrao) - Number(a.padrao) || a.nome.localeCompare(b.nome))
@@ -159,16 +190,7 @@ class LocalFinanceClient implements FinanceClient {
     const database = loadDatabase()
     const page = Math.max(1, filtros.page ?? 1)
     const pageSize = Math.min(100, Math.max(1, filtros.pageSize ?? 20))
-    const min = filtros.minValor ? decimalToCents(filtros.minValor) : undefined
-    const max = filtros.maxValor ? decimalToCents(filtros.maxValor) : undefined
-    const filtered = database.transacoes
-      .filter((item) => !filtros.from || item.data >= filtros.from)
-      .filter((item) => !filtros.to || item.data <= filtros.to)
-      .filter((item) => !filtros.tipo || item.tipo === filtros.tipo)
-      .filter((item) => !filtros.categoriaId || item.categoriaId === filtros.categoriaId)
-      .filter((item) => min === undefined || decimalToCents(item.valor) >= min)
-      .filter((item) => max === undefined || decimalToCents(item.valor) <= max)
-      .sort((a, b) => b.data.localeCompare(a.data) || b.id.localeCompare(a.id))
+    const filtered = filtrarTransacoes(database.transacoes, filtros)
     const start = (page - 1) * pageSize
     return {
       items: filtered.slice(start, start + pageSize).map((item) => enrich(item, database.categorias)),
@@ -203,6 +225,13 @@ class LocalFinanceClient implements FinanceClient {
     if (!database.transacoes.some((transaction) => transaction.id === id)) throw new AppError('Transação não encontrada', 404)
     database.transacoes = database.transacoes.filter((transaction) => transaction.id !== id)
     saveDatabase(database)
+  }
+
+  async exportarTransacoes(filtros: FiltrosTransacao = {}): Promise<Blob> {
+    const database = loadDatabase()
+    return csvDasTransacoes(
+      filtrarTransacoes(database.transacoes, filtros).map((item) => enrich(item, database.categorias)),
+    )
   }
 
   async obterResumo(ano: number, mes: number): Promise<ResumoMensal> {
