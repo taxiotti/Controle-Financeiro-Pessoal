@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { ArrowDownLeft, ArrowUpRight, CircleDollarSign, ReceiptText } from 'lucide-react'
+import { ArrowUpRight, ReceiptText } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { financeClient } from '../api/httpClient'
-import { currentMonth, decimalToCents, formatDate, formatMoney, monthLabel } from '../lib/format'
+import { financeClient } from '../api/client'
+import { ResumoCards } from '../components/resumo-cards'
+import { currentMonth, formatDate, formatMoney, monthLabel } from '../lib/format'
 
 export function DashboardPage() {
   const selected = currentMonth()
@@ -14,8 +15,6 @@ export function DashboardPage() {
     queryKey: ['transacoes', 'recentes'],
     queryFn: () => financeClient.listarTransacoes({ pageSize: 5 }),
   })
-
-  const hasNegativeBalance = decimalToCents(resumo.data?.saldo ?? '0') < 0
 
   return (
     <div className="page">
@@ -30,23 +29,15 @@ export function DashboardPage() {
 
       {resumo.isError && <div className="alert error">Não foi possível calcular o resumo. Recarregue a página.</div>}
 
-      <section className="stats-grid" aria-label="Resumo financeiro do mês">
-        <article className="stat-card income-card">
-          <div className="stat-top"><span>Receitas</span><span className="stat-icon"><ArrowUpRight /></span></div>
-          <strong>{resumo.isPending ? '—' : formatMoney(resumo.data?.totalReceitas ?? '0')}</strong>
-          <small>Entradas em {monthLabel(selected.ano, selected.mes)}</small>
-        </article>
-        <article className="stat-card expense-card">
-          <div className="stat-top"><span>Despesas</span><span className="stat-icon"><ArrowDownLeft /></span></div>
-          <strong>{resumo.isPending ? '—' : formatMoney(resumo.data?.totalDespesas ?? '0')}</strong>
-          <small>Saídas no mês selecionado</small>
-        </article>
-        <article className={hasNegativeBalance ? 'stat-card balance-card negative-balance' : 'stat-card balance-card'}>
-          <div className="stat-top"><span>Saldo</span><span className="stat-icon"><CircleDollarSign /></span></div>
-          <strong>{resumo.isPending ? '—' : formatMoney(resumo.data?.saldo ?? '0')}</strong>
-          <small>{hasNegativeBalance ? 'Atenção: despesas acima das receitas' : 'Receitas menos despesas'}</small>
-        </article>
-      </section>
+      <ResumoCards
+        loading={resumo.isPending}
+        periodLabel={monthLabel(selected.ano, selected.mes)}
+        summary={{
+          income: resumo.data?.totalReceitas ?? '0',
+          expenses: resumo.data?.totalDespesas ?? '0',
+          balance: resumo.data?.saldo ?? '0',
+        }}
+      />
 
       <section className="panel recent-panel">
         <div className="panel-heading">
