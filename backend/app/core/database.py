@@ -1,8 +1,28 @@
 
-from sqlalchemy import create_engine, event
+from sqlalchemy import CHAR, create_engine, event
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.types import TypeDecorator
 
 from app.core.config import settings
+
+
+class GUID(TypeDecorator):
+    """UUID nativo no PostgreSQL e texto nos demais bancos."""
+
+    impl = CHAR(36)
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == "postgresql":
+            return dialect.type_descriptor(UUID(as_uuid=False))
+        return dialect.type_descriptor(CHAR(36))
+
+    def process_bind_param(self, value, dialect):
+        return str(value) if value is not None else None
+
+    def process_result_value(self, value, dialect):
+        return str(value) if value is not None else None
 
 
 class Base(DeclarativeBase):

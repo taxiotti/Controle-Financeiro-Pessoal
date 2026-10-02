@@ -5,7 +5,6 @@ export type Categoria = {
   id: string
   nome: string
   tipo: TipoCategoria
-  cor: string
   icone: string
   padrao: boolean
 }
@@ -59,7 +58,6 @@ export type ResumoMensal = {
 export type FatiaPizza = {
   categoriaId: string
   nome: string
-  cor: string
   total: string
 }
 

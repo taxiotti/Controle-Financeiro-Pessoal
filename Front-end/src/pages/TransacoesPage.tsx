@@ -245,7 +245,7 @@ export function TransacoesPage() {
                   <tr key={transaction.id}>
                     <td><strong>{transaction.descricao}</strong></td>
                     <td>{formatDate(transaction.data)}</td>
-                    <td><span className="category-pill"><i style={{ background: transaction.categoria?.cor }} />{transaction.categoria?.nome ?? 'Sem categoria'}</span></td>
+                    <td><span className="category-pill"><i />{transaction.categoria?.nome ?? 'Sem categoria'}</span></td>
                     <td><span className={`type-badge ${transaction.tipo}`}>{transaction.tipo === 'receita' ? 'Receita' : 'Despesa'}</span></td>
                     <td className={`align-right money ${transaction.tipo}`}>{transaction.tipo === 'receita' ? '+' : '−'} {formatMoney(transaction.valor)}</td>
                     <td><div className="row-actions"><button className="icon-button" type="button" onClick={() => updateSearch({ editar: transaction.id })} aria-label={`Editar ${transaction.descricao}`}><Pencil size={16} /></button><button className="icon-button danger-button" type="button" onClick={() => updateSearch({ excluir: transaction.id })} aria-label={`Excluir ${transaction.descricao}`}><Trash2 size={16} /></button></div></td>

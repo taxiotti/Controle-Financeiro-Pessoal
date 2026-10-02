@@ -22,7 +22,6 @@ class ResumoMensal(ValoresMonetarios):
 class FatiaPizza(BaseModel):
     categoria_id: UUID = Field(serialization_alias="categoriaId")
     nome: str
-    cor: str
     total: Decimal
 
     @field_serializer("total")

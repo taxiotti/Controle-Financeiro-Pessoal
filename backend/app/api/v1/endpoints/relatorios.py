@@ -93,7 +93,7 @@ def pizza(
     fim = inicio_mes(*proximo_mes(ano, mes))
     total = func.sum(Transacao.valor).label("total")
     linhas = db.execute(
-        select(Categoria.id, Categoria.nome, Categoria.cor, total)
+        select(Categoria.id, Categoria.nome, total)
         .join(Transacao, Transacao.categoria_id == Categoria.id)
         .where(
             Transacao.usuario_id == usuario.id,
@@ -101,14 +101,13 @@ def pizza(
             Transacao.data < fim,
             Transacao.tipo == tipo,
         )
-        .group_by(Categoria.id, Categoria.nome, Categoria.cor)
+        .group_by(Categoria.id, Categoria.nome)
         .order_by(total.desc(), Categoria.nome)
     ).all()
     return [
         FatiaPizza(
             categoria_id=linha.id,
             nome=linha.nome,
-            cor=linha.cor,
             total=decimal(linha.total),
         )
         for linha in linhas

@@ -7,6 +7,8 @@ import { GraficoLinha } from '../components/grafico-linha'
 import { GraficoPizza } from '../components/grafico-pizza'
 import { currentMonth, decimalToCents, monthLabel, shortMonthLabel } from '../lib/format'
 
+const PIE_COLORS = ['#238C66', '#3B82F6', '#8B5CF6', '#F97316', '#EC4899', '#EAB308']
+
 export function RelatoriosPage() {
   const [search, setSearch] = useSearchParams()
   const fallback = currentMonth()
@@ -27,10 +29,10 @@ export function RelatoriosPage() {
     queryFn: () => financeClient.obterComparativo(ano, mes),
   })
 
-  const pieData = pizza.data?.map((slice) => ({
+  const pieData = pizza.data?.map((slice, index) => ({
     id: slice.categoriaId,
     name: slice.nome,
-    color: slice.cor,
+    color: PIE_COLORS[index % PIE_COLORS.length],
     value: decimalToCents(slice.total) / 100,
   })) ?? []
   const lineData = evolution.data?.map((point) => ({

@@ -132,7 +132,6 @@ def test_edicao_e_exclusao_respeitam_usuario_atual(api):
             usuario_id=outro.id,
             nome="Outra",
             tipo="despesa",
-            cor="#000000",
             icone="circle",
             padrao=False,
         )

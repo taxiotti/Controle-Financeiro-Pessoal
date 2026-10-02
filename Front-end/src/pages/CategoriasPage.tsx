@@ -42,8 +42,8 @@ function CategoryForm({ category, onClose, onSaved }: FormProps) {
   const { register, handleSubmit, formState: { errors } } = useForm<CategoriaFormValues>({
     resolver: zodResolver(categoriaSchema),
     defaultValues: category
-      ? { nome: category.nome, tipo: category.tipo, cor: category.cor, icone: category.icone }
-      : { nome: '', tipo: 'despesa', cor: '#238C66', icone: 'shapes' },
+      ? { nome: category.nome, tipo: category.tipo, icone: category.icone }
+      : { nome: '', tipo: 'despesa', icone: 'shapes' },
   })
   const mutation = useMutation({
     mutationFn: (values: CategoriaFormValues) => category
@@ -76,23 +76,17 @@ function CategoryForm({ category, onClose, onSaved }: FormProps) {
             <option value="ambos">Receita e despesa</option>
           </select>
         </label>
-        <div className="form-grid">
-          <label className="field">
-            <span>Cor</span>
-            <input className="color-input" type="color" {...register('cor')} />
-          </label>
-          <fieldset className="field icon-picker">
-            <legend>Ícone</legend>
-            <div>
-              {iconOptions.map((icon) => (
-                <label key={icon}>
-                  <input type="radio" value={icon} {...register('icone')} />
-                  <span><CategoryIcon name={icon} /></span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-        </div>
+        <fieldset className="field icon-picker">
+          <legend>Ícone</legend>
+          <div>
+            {iconOptions.map((icon) => (
+              <label key={icon}>
+                <input type="radio" value={icon} {...register('icone')} />
+                <span><CategoryIcon name={icon} /></span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
         {mutation.isError && <div className="alert error">{mutation.error.message}</div>}
         <div className="modal-actions">
           <button className="secondary-button" type="button" onClick={onClose}>Cancelar</button>
@@ -138,7 +132,7 @@ export function CategoriasPage() {
         <div className="category-grid">
           {categories.data?.map((category) => (
             <article className="category-card" key={category.id}>
-              <span className="category-icon" style={{ color: category.cor, backgroundColor: `${category.cor}18` }}><CategoryIcon name={category.icone} /></span>
+              <span className="category-icon"><CategoryIcon name={category.icone} /></span>
               <div className="category-copy">
                 <strong>{category.nome}</strong>
                 <span>{category.tipo === 'ambos' ? 'Receita e despesa' : category.tipo === 'receita' ? 'Receita' : 'Despesa'}</span>

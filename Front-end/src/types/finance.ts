@@ -6,7 +6,6 @@ export type Category = {
   id: string
   nome: string
   tipo: CategoryType
-  cor: string
   icone: string
   padrao: boolean
 }

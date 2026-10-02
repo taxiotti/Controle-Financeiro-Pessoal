@@ -26,15 +26,15 @@ type Database = {
 }
 
 const defaultCategories: Categoria[] = [
-  { id: '10000000-0000-4000-8000-000000000001', nome: 'Alimentação', tipo: 'despesa', cor: '#F59E0B', icone: 'utensils', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000002', nome: 'Transporte', tipo: 'despesa', cor: '#3B82F6', icone: 'car', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000003', nome: 'Moradia', tipo: 'despesa', cor: '#8B5CF6', icone: 'house', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000004', nome: 'Saúde', tipo: 'despesa', cor: '#EF4444', icone: 'heart-pulse', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000005', nome: 'Educação', tipo: 'despesa', cor: '#06B6D4', icone: 'graduation-cap', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000006', nome: 'Lazer', tipo: 'despesa', cor: '#EC4899', icone: 'gamepad', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000007', nome: 'Salário', tipo: 'receita', cor: '#22C55E', icone: 'wallet', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000008', nome: 'Investimentos', tipo: 'receita', cor: '#14B8A6', icone: 'chart', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000009', nome: 'Outros', tipo: 'ambos', cor: '#64748B', icone: 'shapes', padrao: true },
+  { id: '10000000-0000-4000-8000-000000000001', nome: 'Alimentação', tipo: 'despesa', icone: 'utensils', padrao: true },
+  { id: '10000000-0000-4000-8000-000000000002', nome: 'Transporte', tipo: 'despesa', icone: 'car', padrao: true },
+  { id: '10000000-0000-4000-8000-000000000003', nome: 'Moradia', tipo: 'despesa', icone: 'house', padrao: true },
+  { id: '10000000-0000-4000-8000-000000000004', nome: 'Saúde', tipo: 'despesa', icone: 'heart-pulse', padrao: true },
+  { id: '10000000-0000-4000-8000-000000000005', nome: 'Educação', tipo: 'despesa', icone: 'graduation-cap', padrao: true },
+  { id: '10000000-0000-4000-8000-000000000006', nome: 'Lazer', tipo: 'despesa', icone: 'gamepad', padrao: true },
+  { id: '10000000-0000-4000-8000-000000000007', nome: 'Salário', tipo: 'receita', icone: 'wallet', padrao: true },
+  { id: '10000000-0000-4000-8000-000000000008', nome: 'Investimentos', tipo: 'receita', icone: 'chart', padrao: true },
+  { id: '10000000-0000-4000-8000-000000000009', nome: 'Outros', tipo: 'ambos', icone: 'shapes', padrao: true },
 ]
 
 function emptyDatabase(): Database {
@@ -249,7 +249,7 @@ class LocalFinanceClient implements FinanceClient {
     return [...totals.entries()]
       .map(([categoriaId, total]) => {
         const category = database.categorias.find((item) => item.id === categoriaId)
-        return { categoriaId, nome: category?.nome ?? 'Sem categoria', cor: category?.cor ?? '#64748B', total: centsToDecimal(total) }
+        return { categoriaId, nome: category?.nome ?? 'Sem categoria', total: centsToDecimal(total) }
       })
       .sort((a, b) => decimalToCents(b.total) - decimalToCents(a.total))
   }
