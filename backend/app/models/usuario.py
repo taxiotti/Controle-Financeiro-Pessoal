@@ -19,3 +19,8 @@ class Usuario(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
     )
+    atualizado_em: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )

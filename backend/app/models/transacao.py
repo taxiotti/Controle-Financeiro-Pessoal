@@ -3,7 +3,7 @@ from datetime import date, datetime, timezone
 from decimal import Decimal
 from uuid import uuid4
 
-from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, ForeignKey, Index, Numeric, String
+from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, Index, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base, GUID
@@ -28,11 +28,11 @@ class Transacao(Base):
         GUID(),
         ForeignKey("categorias.id", ondelete="RESTRICT"),
     )
+    recorrencia_id: Mapped[str | None] = mapped_column(GUID(), nullable=True)
     tipo: Mapped[str] = mapped_column(String(7))
     valor: Mapped[Decimal] = mapped_column(Numeric(12, 2))
     descricao: Mapped[str] = mapped_column(String(120))
     data: Mapped[date] = mapped_column(Date)
-    recorrente: Mapped[bool] = mapped_column(Boolean, default=False)
     criado_em: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),

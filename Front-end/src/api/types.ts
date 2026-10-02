@@ -5,11 +5,9 @@ export type Categoria = {
   id: string
   nome: string
   tipo: TipoCategoria
-  icone: string
-  padrao: boolean
 }
 
-export type CategoriaInput = Omit<Categoria, 'id' | 'padrao'>
+export type CategoriaInput = Omit<Categoria, 'id'>
 
 export type Transacao = {
   id: string

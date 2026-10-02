@@ -48,7 +48,7 @@ def criar(
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_usuario_atual),
 ):
-    categoria = Categoria(**payload.model_dump(), usuario_id=usuario.id, padrao=False)
+    categoria = Categoria(**payload.model_dump(), usuario_id=usuario.id)
     db.add(categoria)
     salvar(db)
     db.refresh(categoria)
@@ -84,8 +84,6 @@ def excluir(
     usuario: Usuario = Depends(get_usuario_atual),
 ):
     categoria = buscar_categoria(db, id, usuario)
-    if categoria.padrao:
-        raise HTTPException(409, "Categorias padrão não podem ser excluídas.")
     em_uso = db.scalar(select(Transacao.id).where(
         Transacao.categoria_id == categoria.id,
     ).limit(1))

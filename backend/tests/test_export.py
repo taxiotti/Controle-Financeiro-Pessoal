@@ -4,7 +4,7 @@ def test_export_csv_com_cabecalho_e_linhas_do_usuario(api):
     assert vazia.status_code == 200
     assert "text/csv" in vazia.headers["content-type"]
     texto_vazio = vazia.content.decode("utf-8-sig")
-    assert texto_vazio.splitlines()[0] == "Data;Tipo;Descrição;Valor;Categoria"
+    assert texto_vazio.splitlines()[0] == "Descrição;Data;Categoria;Tipo;Valor"
 
     categorias = client.get("/api/categorias").json()
     despesa = next(item for item in categorias if item["tipo"] == "despesa")
@@ -18,5 +18,6 @@ def test_export_csv_com_cabecalho_e_linhas_do_usuario(api):
 
     csv_bytes = client.get("/api/transacoes/export").content
     texto = csv_bytes.decode("utf-8-sig")
-    assert "20/09/2026;despesa;Almoço;12,50;" in texto
+    assert "Almoço;20/09/2026;" in texto
+    assert ";Despesa;12,50" in texto
     assert despesa["nome"] in texto

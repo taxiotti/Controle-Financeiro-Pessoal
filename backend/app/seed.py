@@ -7,20 +7,20 @@ from app.core.security import hash_senha
 from app.models import Categoria, Usuario
 
 CATEGORIAS_PADRAO = [
-    ("Alimentação", "despesa", "utensils"),
-    ("Transporte", "despesa", "car"),
-    ("Moradia", "despesa", "house"),
-    ("Saúde", "despesa", "heart-pulse"),
-    ("Educação", "despesa", "graduation-cap"),
-    ("Lazer", "despesa", "gamepad-2"),
-    ("Salário", "receita", "wallet"),
-    ("Investimentos", "receita", "trending-up"),
-    ("Outros", "ambos", "ellipsis"),
+    ("Alimentação", "despesa"),
+    ("Transporte", "despesa"),
+    ("Moradia", "despesa"),
+    ("Saúde", "despesa"),
+    ("Educação", "despesa"),
+    ("Lazer", "despesa"),
+    ("Salário", "receita"),
+    ("Investimentos", "receita"),
+    ("Outros", "ambos"),
 ]
 
 
-def garantir_categorias_padrao(db, usuario: Usuario) -> None:
-    for nome, tipo, icone in CATEGORIAS_PADRAO:
+def garantir_categorias_iniciais(db, usuario: Usuario) -> None:
+    for nome, tipo in CATEGORIAS_PADRAO:
         existente = db.scalar(select(Categoria).where(
             Categoria.usuario_id == usuario.id,
             Categoria.nome == nome,
@@ -30,8 +30,6 @@ def garantir_categorias_padrao(db, usuario: Usuario) -> None:
                 usuario_id=usuario.id,
                 nome=nome,
                 tipo=tipo,
-                icone=icone,
-                padrao=True,
             ))
 
 
@@ -49,7 +47,7 @@ def seed(db):
         db.add(usuario)
         db.flush()
 
-    garantir_categorias_padrao(db, usuario)
+    garantir_categorias_iniciais(db, usuario)
     db.commit()
 
 

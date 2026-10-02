@@ -13,7 +13,6 @@ const moneyInput = z
 export const categoriaSchema = z.object({
   nome: z.string().trim().min(2, 'Use pelo menos 2 caracteres').max(40, 'Use no máximo 40 caracteres'),
   tipo: z.enum(['receita', 'despesa', 'ambos']),
-  icone: z.string().min(1, 'Selecione um ícone'),
 })
 
 export const transacaoFormSchema = z.object({

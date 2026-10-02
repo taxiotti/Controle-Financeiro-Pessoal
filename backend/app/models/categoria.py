@@ -2,7 +2,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, String, UniqueConstraint
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base, GUID
@@ -22,9 +22,12 @@ class Categoria(Base):
     )
     nome: Mapped[str] = mapped_column(String(40))
     tipo: Mapped[str] = mapped_column(String(7))
-    icone: Mapped[str] = mapped_column(String)
-    padrao: Mapped[bool] = mapped_column(Boolean, default=False)
     criado_em: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
+    )
+    atualizado_em: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
     )
