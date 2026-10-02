@@ -12,11 +12,16 @@ Dashboard React + Vite do Controle Financeiro Pessoal.
 
 ## Integração com o backend existente
 
-A tela usa `VITE_API_URL` (padrão `http://localhost:8000/api`) e consome apenas as rotas já disponíveis:
+A tela usa `VITE_API_URL` (padrão `https://controle-financeiro-pessoal-eeje.onrender.com/api`) e consome as rotas já disponíveis:
 
 - `GET /categorias`
 - `GET /transacoes?page=...&pageSize=...`
 - `POST /transacoes`
+
+As telas de cadastro e login usam `POST /auth/register` e `POST /auth/login`.
+Após a autenticação, o token JWT é persistido no navegador e enviado em todas as
+requisições protegidas, incluindo exportação de CSV. As rotas do dashboard
+validam a sessão em `GET /auth/me`; uma sessão inválida redireciona para o login.
 
 O cliente percorre as páginas de transações antes de calcular os totais e agrupamentos no front. Assim, o resumo não depende apenas da página atualmente visível. Quando a API está indisponível, a tela exibe um alerta e mantém os estados vazios sem quebrar.
 

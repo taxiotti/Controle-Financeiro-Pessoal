@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     database_url: str = "sqlite:///./controle_financeiro.db"
-    cors_origins: str = "http://localhost:5173"
+    cors_origins: str = "http://localhost:5173,https://controle-financeiro-pessoal-1.onrender.com"
     secret_key: str = "troque-isto-em-producao"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 10080

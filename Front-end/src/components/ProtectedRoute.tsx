@@ -1,17 +1,26 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { api } from '../lib/api-client'
-import { clearSessao, getToken, getUsuario, setSessao } from '../lib/session'
+import { clearSessao, getToken, getUsuario, SESSION_CLEARED_EVENT, setSessao } from '../lib/session'
 
 export function ProtectedRoute() {
-  const [checking, setChecking] = useState(Boolean(getToken()))
-  const [authenticated, setAuthenticated] = useState(Boolean(getToken() && getUsuario()))
+  const hasStoredSession = Boolean(getToken() && getUsuario())
+  const [checking, setChecking] = useState(hasStoredSession)
+  const [authenticated, setAuthenticated] = useState(hasStoredSession)
+
+  useEffect(() => {
+    function handleSessionCleared() {
+      setAuthenticated(false)
+      setChecking(false)
+    }
+
+    window.addEventListener(SESSION_CLEARED_EVENT, handleSessionCleared)
+    return () => window.removeEventListener(SESSION_CLEARED_EVENT, handleSessionCleared)
+  }, [])
 
   useEffect(() => {
     const token = getToken()
     if (!token || !getUsuario()) {
-      setAuthenticated(false)
-      setChecking(false)
       return
     }
     api.me()

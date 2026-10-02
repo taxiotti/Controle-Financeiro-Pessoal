@@ -1,5 +1,6 @@
 const TOKEN_KEY = "cfp.accessToken"
 const USER_KEY = "cfp.usuario"
+export const SESSION_CLEARED_EVENT = "cfp:session-cleared"
 
 export type UsuarioSessao = {
   id: string
@@ -29,6 +30,7 @@ export function setSessao(token: string, usuario: UsuarioSessao): void {
 export function clearSessao(): void {
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(USER_KEY)
+  window.dispatchEvent(new Event(SESSION_CLEARED_EVENT))
 }
 
 export function iniciais(nome: string): string {
