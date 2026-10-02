@@ -7,20 +7,20 @@ from app.core.security import hash_senha
 from app.models import Categoria, Usuario
 
 CATEGORIAS_PADRAO = [
-    ("Alimentação", "despesa", "#F97316", "utensils"),
-    ("Transporte", "despesa", "#3B82F6", "car"),
-    ("Moradia", "despesa", "#8B5CF6", "house"),
-    ("Saúde", "despesa", "#EF4444", "heart-pulse"),
-    ("Educação", "despesa", "#EAB308", "graduation-cap"),
-    ("Lazer", "despesa", "#EC4899", "gamepad-2"),
-    ("Salário", "receita", "#22C55E", "wallet"),
-    ("Investimentos", "receita", "#14B8A6", "trending-up"),
-    ("Outros", "ambos", "#64748B", "ellipsis"),
+    ("Alimentação", "despesa", "utensils"),
+    ("Transporte", "despesa", "car"),
+    ("Moradia", "despesa", "house"),
+    ("Saúde", "despesa", "heart-pulse"),
+    ("Educação", "despesa", "graduation-cap"),
+    ("Lazer", "despesa", "gamepad-2"),
+    ("Salário", "receita", "wallet"),
+    ("Investimentos", "receita", "trending-up"),
+    ("Outros", "ambos", "ellipsis"),
 ]
 
 
 def garantir_categorias_padrao(db, usuario: Usuario) -> None:
-    for nome, tipo, cor, icone in CATEGORIAS_PADRAO:
+    for nome, tipo, icone in CATEGORIAS_PADRAO:
         existente = db.scalar(select(Categoria).where(
             Categoria.usuario_id == usuario.id,
             Categoria.nome == nome,
@@ -30,7 +30,6 @@ def garantir_categorias_padrao(db, usuario: Usuario) -> None:
                 usuario_id=usuario.id,
                 nome=nome,
                 tipo=tipo,
-                cor=cor,
                 icone=icone,
                 padrao=True,
             ))

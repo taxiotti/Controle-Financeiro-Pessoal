@@ -88,13 +88,11 @@ def test_pizza_agrupa_categoria_filtra_tipo_e_ordena_total(api):
     primeira = client.post("/api/categorias", json={
         "nome": "Casa",
         "tipo": "despesa",
-        "cor": "#111111",
         "icone": "house",
     }).json()
     segunda = client.post("/api/categorias", json={
         "nome": "Pets",
         "tipo": "despesa",
-        "cor": "#222222",
         "icone": "paw-print",
     }).json()
     receita = categoria_id(client, "receita")
@@ -105,8 +103,8 @@ def test_pizza_agrupa_categoria_filtra_tipo_e_ordena_total(api):
     pizza = client.get("/api/relatorios/pizza?ano=2026&mes=9&tipo=despesa")
     assert pizza.status_code == 200
     assert pizza.json() == [
-        {"categoriaId": segunda["id"], "nome": "Pets", "cor": "#222222", "total": "250.00"},
-        {"categoriaId": primeira["id"], "nome": "Casa", "cor": "#111111", "total": "100.00"},
+        {"categoriaId": segunda["id"], "nome": "Pets", "total": "250.00"},
+        {"categoriaId": primeira["id"], "nome": "Casa", "total": "100.00"},
     ]
     assert client.get("/api/relatorios/pizza?ano=2026&mes=8&tipo=despesa").json() == []
     assert client.get("/api/relatorios/pizza?ano=2026&mes=9&tipo=invalido").status_code == 400
@@ -147,7 +145,6 @@ def test_comparativo_calcula_variacoes_e_isola_usuario(api):
             usuario_id=outro.id,
             nome="Outra",
             tipo="receita",
-            cor="#000000",
             icone="circle",
             padrao=False,
         )

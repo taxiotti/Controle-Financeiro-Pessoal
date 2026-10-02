@@ -54,7 +54,6 @@ describe('local finance client', () => {
     const category = await financeClient.criarCategoria({
       nome: 'Pets',
       tipo: 'despesa',
-      cor: '#123456',
       icone: 'shapes',
     })
     for (let index = 0; index < 21; index += 1) {

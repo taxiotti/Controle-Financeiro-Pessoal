@@ -59,7 +59,7 @@ export function DashboardPage() {
           <div className="transaction-list">
             {recentes.data.items.map((transaction) => (
               <div className="transaction-row" key={transaction.id}>
-                <span className="category-dot" style={{ background: transaction.categoria?.cor }} />
+                <span className="category-dot" />
                 <div className="transaction-main">
                   <strong>{transaction.descricao}</strong>
                   <span>{transaction.categoria?.nome ?? 'Sem categoria'} · {formatDate(transaction.data)}</span>
