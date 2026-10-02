@@ -14,8 +14,9 @@ import type {
 } from './types'
 import { AppError } from './types'
 import { centsToDecimal, decimalToCents } from '../lib/format'
+import { clearSessao, getToken } from '../lib/session'
 
-const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api').replace(/\/$/, '')
+const API_URL = (import.meta.env.VITE_API_URL ?? 'https://controle-financeiro-pessoal-eeje.onrender.com/api').replace(/\/$/, '')
 
 function queryFiltros(filtros: FiltrosTransacao): string {
   const params = new URLSearchParams()
@@ -34,9 +35,14 @@ function queryFiltros(filtros: FiltrosTransacao): string {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const headers = new Headers(options?.headers)
+  const token = getToken()
+  if (token) headers.set('Authorization', `Bearer ${token}`)
+  if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
+
   const response = await fetch(`${API_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(options?.headers ?? {}) },
     ...options,
+    headers,
   })
 
   if (response.status === 204) return undefined as T
@@ -44,6 +50,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const body = await response.json().catch(() => ({})) as { error?: string }
 
   if (!response.ok) {
+    if (response.status === 401) clearSessao()
     throw new AppError(body.error ?? `Não foi possível acessar a API (${response.status}).`, response.status)
   }
 
@@ -51,10 +58,14 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 async function requestCsv(path: string): Promise<Blob> {
-  const response = await fetch(`${API_URL}${path}`, { headers: { Accept: 'text/csv' } })
+  const headers = new Headers({ Accept: 'text/csv' })
+  const token = getToken()
+  if (token) headers.set('Authorization', `Bearer ${token}`)
+  const response = await fetch(`${API_URL}${path}`, { headers })
   if (response.ok) return response.blob()
 
   const body = await response.json().catch(() => ({})) as { error?: string; detail?: string }
+  if (response.status === 401) clearSessao()
   throw new AppError(body.error ?? body.detail ?? 'Não foi possível exportar a listagem.', response.status)
 }
 

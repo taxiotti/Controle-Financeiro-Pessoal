@@ -2,7 +2,7 @@ import { clearSessao, getToken } from './session'
 import { httpFinanceClient } from '../api/httpClient'
 import type { TransacaoInput } from '../api/types'
 
-const baseUrl = (import.meta.env.VITE_API_URL ?? 'https://controle-financeiro-pessoal-eeje.onrender.com').replace(/\/$/, '')
+const baseUrl = (import.meta.env.VITE_API_URL ?? 'https://controle-financeiro-pessoal-eeje.onrender.com/api').replace(/\/$/, '')
 
 export class ApiError extends Error {
   readonly status: number
