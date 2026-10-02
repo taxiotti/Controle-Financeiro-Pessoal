@@ -3,7 +3,7 @@ from datetime import date, datetime, timezone
 from decimal import Decimal
 from uuid import uuid4
 
-from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, ForeignKey, Index, Numeric, String
+from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, ForeignKey, Index, Numeric, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -19,9 +19,15 @@ class Transacao(Base):
         CheckConstraint("valor > 0"),
     )
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
-    usuario_id: Mapped[str] = mapped_column(ForeignKey("usuarios.id", ondelete="CASCADE"))
-    categoria_id: Mapped[str] = mapped_column(ForeignKey("categorias.id", ondelete="RESTRICT"))
+    id: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True, default=lambda: str(uuid4()))
+    usuario_id: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False),
+        ForeignKey("usuarios.id", ondelete="CASCADE"),
+    )
+    categoria_id: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False),
+        ForeignKey("categorias.id", ondelete="RESTRICT"),
+    )
     tipo: Mapped[str] = mapped_column(String(7))
     valor: Mapped[Decimal] = mapped_column(Numeric(12, 2))
     descricao: Mapped[str] = mapped_column(String(120))
