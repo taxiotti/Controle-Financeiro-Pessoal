@@ -6,8 +6,6 @@ export type Category = {
   id: string
   nome: string
   tipo: CategoryType
-  icone: string
-  padrao: boolean
 }
 
 export type Transaction = {

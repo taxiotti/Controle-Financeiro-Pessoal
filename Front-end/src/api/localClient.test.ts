@@ -5,11 +5,11 @@ import { financeClient } from './localClient'
 describe('local finance client', () => {
   beforeEach(() => localStorage.clear())
 
-  it('inicializa as nove categorias padrão e bloqueia a exclusão', async () => {
+  it('inicializa as nove categorias e permite excluir uma sem uso', async () => {
     const categories = await financeClient.listarCategorias()
     expect(categories).toHaveLength(9)
-    expect(categories.every((category) => category.padrao)).toBe(true)
-    await expect(financeClient.excluirCategoria(categories[0].id)).rejects.toThrow('padrão')
+    await financeClient.excluirCategoria(categories[0].id)
+    await expect(financeClient.listarCategorias()).resolves.toHaveLength(8)
   })
 
   it('aplica regras de categoria, persiste transações e calcula relatórios', async () => {
@@ -54,7 +54,6 @@ describe('local finance client', () => {
     const category = await financeClient.criarCategoria({
       nome: 'Pets',
       tipo: 'despesa',
-      icone: 'shapes',
     })
     for (let index = 0; index < 21; index += 1) {
       await financeClient.criarTransacao({
@@ -81,7 +80,7 @@ describe('local finance client', () => {
     const csv = await financeClient.exportarTransacoes({ tipo: 'despesa' })
 
     await expect(csv.text()).resolves.toBe(
-      '\ufeffDescrição;Data;Categoria;Tipo;Valor\r\n"Mercado; semanal";20/09/2026;Alimentação;Despesa;12,50\r\n',
+      'Descrição;Data;Categoria;Tipo;Valor\r\n"Mercado; semanal";20/09/2026;Alimentação;Despesa;12,50\r\n',
     )
   })
 })

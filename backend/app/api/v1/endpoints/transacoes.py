@@ -1,12 +1,10 @@
 
-from typing import Annotated
 import csv
 from datetime import date
 from decimal import Decimal
 from io import StringIO
 from typing import Annotated, Literal
 from uuid import UUID
-import io
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -209,7 +207,7 @@ def exportar(
         content=stream.getvalue().encode("utf-8"),
         media_type="text/csv; charset=utf-8",
         headers={
-            "Content-Disposition": 'attachment; filename="transacoes.csv"'
+            "Content-Disposition": "attachment; filename=transacoes.csv"
         },
     )
   
@@ -232,7 +230,6 @@ def criar(
         valor=payload.valor,
         descricao=payload.descricao,
         data=payload.data,
-        recorrente=False,
     )
     db.add(transacao)
     db.commit()

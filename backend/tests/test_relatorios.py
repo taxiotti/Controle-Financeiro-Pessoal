@@ -2,44 +2,10 @@ from datetime import date
 from decimal import Decimal
 
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
 import app.api.v1.endpoints.relatorios as endpoint
-from app.core.config import settings
-from app.core.database import Base, get_db
-from app.main import app
 from app.models import Categoria, Transacao, Usuario
-from app.seed import seed
-
-
-@pytest.fixture
-def api(tmp_path, monkeypatch):
-    engine = create_engine(
-        f"sqlite:///{tmp_path / 'test.db'}",
-        connect_args={"check_same_thread": False},
-    )
-
-    @event.listens_for(engine, "connect")
-    def foreign_keys(connection, _):
-        connection.execute("PRAGMA foreign_keys=ON")
-
-    Base.metadata.create_all(engine)
-    monkeypatch.setattr(settings, "dev_user_password", "test-password")
-    with Session(engine) as db:
-        seed(db)
-
-    def override_db():
-        with Session(engine) as db:
-            yield db
-
-    app.dependency_overrides[get_db] = override_db
-    client = TestClient(app)
-    yield client, engine
-    client.close()
-    app.dependency_overrides.clear()
-    engine.dispose()
 
 
 def categoria_id(client, tipo):
@@ -88,12 +54,10 @@ def test_pizza_agrupa_categoria_filtra_tipo_e_ordena_total(api):
     primeira = client.post("/api/categorias", json={
         "nome": "Casa",
         "tipo": "despesa",
-        "icone": "house",
     }).json()
     segunda = client.post("/api/categorias", json={
         "nome": "Pets",
         "tipo": "despesa",
-        "icone": "paw-print",
     }).json()
     receita = categoria_id(client, "receita")
     criar(client, primeira["id"], "despesa", 100, "2026-09-03")
@@ -145,8 +109,6 @@ def test_comparativo_calcula_variacoes_e_isola_usuario(api):
             usuario_id=outro.id,
             nome="Outra",
             tipo="receita",
-            icone="circle",
-            padrao=False,
         )
         db.add(categoria)
         db.flush()

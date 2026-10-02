@@ -1,35 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import {
-  Car, ChartNoAxesCombined, Gamepad2, GraduationCap, HeartPulse, House, Pencil, Plus,
-  Shapes, Trash2, Utensils, Wallet, X,
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { Pencil, Plus, Shapes, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { financeClient } from '../api/client'
 import { categoriaSchema } from '../api/schemas'
 import type { CategoriaFormValues } from '../api/schemas'
 import type { Categoria } from '../api/types'
-
-const icons: Record<string, LucideIcon> = {
-  utensils: Utensils,
-  car: Car,
-  house: House,
-  'heart-pulse': HeartPulse,
-  'graduation-cap': GraduationCap,
-  gamepad: Gamepad2,
-  wallet: Wallet,
-  chart: ChartNoAxesCombined,
-  shapes: Shapes,
-}
-
-const iconOptions = Object.keys(icons)
-
-function CategoryIcon({ name }: { name: string }) {
-  const Icon = icons[name] ?? Shapes
-  return <Icon size={19} aria-hidden="true" />
-}
 
 type FormProps = {
   category?: Categoria
@@ -42,8 +19,8 @@ function CategoryForm({ category, onClose, onSaved }: FormProps) {
   const { register, handleSubmit, formState: { errors } } = useForm<CategoriaFormValues>({
     resolver: zodResolver(categoriaSchema),
     defaultValues: category
-      ? { nome: category.nome, tipo: category.tipo, icone: category.icone }
-      : { nome: '', tipo: 'despesa', icone: 'shapes' },
+      ? { nome: category.nome, tipo: category.tipo }
+      : { nome: '', tipo: 'despesa' },
   })
   const mutation = useMutation({
     mutationFn: (values: CategoriaFormValues) => category
@@ -76,17 +53,6 @@ function CategoryForm({ category, onClose, onSaved }: FormProps) {
             <option value="ambos">Receita e despesa</option>
           </select>
         </label>
-        <fieldset className="field icon-picker">
-          <legend>Ícone</legend>
-          <div>
-            {iconOptions.map((icon) => (
-              <label key={icon}>
-                <input type="radio" value={icon} {...register('icone')} />
-                <span><CategoryIcon name={icon} /></span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
         {mutation.isError && <div className="alert error">{mutation.error.message}</div>}
         <div className="modal-actions">
           <button className="secondary-button" type="button" onClick={onClose}>Cancelar</button>
@@ -126,20 +92,19 @@ export function CategoriasPage() {
       </section>
 
       <section className="panel">
-        <div className="panel-heading"><div><h2>Categorias</h2><p>Padrões ficam protegidas; categorias em uso não podem ser excluídas.</p></div></div>
+        <div className="panel-heading"><div><h2>Categorias</h2><p>Categorias em uso não podem ser excluídas.</p></div></div>
         {categories.isPending && <div className="loading-state">Carregando categorias…</div>}
         {categories.isError && <div className="alert error">Não foi possível carregar as categorias.</div>}
         <div className="category-grid">
           {categories.data?.map((category) => (
             <article className="category-card" key={category.id}>
-              <span className="category-icon"><CategoryIcon name={category.icone} /></span>
+              <span className="category-icon"><Shapes size={19} aria-hidden="true" /></span>
               <div className="category-copy">
                 <strong>{category.nome}</strong>
                 <span>{category.tipo === 'ambos' ? 'Receita e despesa' : category.tipo === 'receita' ? 'Receita' : 'Despesa'}</span>
               </div>
-              {category.padrao && <span className="badge">Padrão</span>}
               <div className="row-actions">
-                <button className="icon-button" type="button" onClick={() => setEditing(category)} disabled={category.padrao} title={category.padrao ? 'Categorias padrão não são editáveis' : 'Editar'} aria-label={`Editar ${category.nome}`}><Pencil size={16} /></button>
+                <button className="icon-button" type="button" onClick={() => setEditing(category)} title="Editar" aria-label={`Editar ${category.nome}`}><Pencil size={16} /></button>
                 <button className="icon-button danger-button" type="button" onClick={() => setDeleting(category)} aria-label={`Excluir ${category.nome}`}><Trash2 size={16} /></button>
               </div>
             </article>
@@ -152,7 +117,7 @@ export function CategoriasPage() {
         <div className="modal-backdrop" role="presentation" onMouseDown={() => setDeleting(null)}>
           <div className="dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-category-title" onMouseDown={(event) => event.stopPropagation()}>
             <h2 id="delete-category-title">Excluir “{deleting.nome}”?</h2>
-            <p>{deleting.padrao ? 'Esta é uma categoria padrão e sua exclusão será bloqueada.' : 'A exclusão só será concluída se não houver transações vinculadas.'}</p>
+            <p>A exclusão só será concluída se não houver transações vinculadas.</p>
             {deleteMutation.isError && <div className="alert error">{deleteMutation.error.message}</div>}
             <div className="modal-actions">
               <button className="secondary-button" type="button" onClick={() => setDeleting(null)}>Cancelar</button>

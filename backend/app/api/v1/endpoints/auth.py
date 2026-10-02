@@ -7,7 +7,7 @@ from app.core.database import get_db
 from app.core.security import criar_access_token, get_usuario_atual, hash_senha, verificar_senha
 from app.models import Usuario
 from app.schemas.auth import LoginInput, RegistroInput, SessaoResponse, UsuarioPublico
-from app.seed import garantir_categorias_padrao
+from app.seed import garantir_categorias_iniciais
 
 router = APIRouter()
 
@@ -35,7 +35,7 @@ def registrar(payload: RegistroInput, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(409, "Já existe uma conta com este e-mail.") from None
 
-    garantir_categorias_padrao(db, usuario)
+    garantir_categorias_iniciais(db, usuario)
     db.commit()
     db.refresh(usuario)
     return _sessao(usuario)

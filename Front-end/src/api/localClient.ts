@@ -16,8 +16,8 @@ import type {
 import { AppError } from './types'
 import { centsToDecimal, currentMonth, decimalToCents, shiftMonth } from '../lib/format'
 
-const STORAGE_KEY = 'cfp:v1:data'
-const VERSION = 1
+const STORAGE_KEY = 'cfp:v2:data'
+const VERSION = 2
 
 type Database = {
   version: number
@@ -26,15 +26,15 @@ type Database = {
 }
 
 const defaultCategories: Categoria[] = [
-  { id: '10000000-0000-4000-8000-000000000001', nome: 'Alimentação', tipo: 'despesa', icone: 'utensils', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000002', nome: 'Transporte', tipo: 'despesa', icone: 'car', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000003', nome: 'Moradia', tipo: 'despesa', icone: 'house', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000004', nome: 'Saúde', tipo: 'despesa', icone: 'heart-pulse', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000005', nome: 'Educação', tipo: 'despesa', icone: 'graduation-cap', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000006', nome: 'Lazer', tipo: 'despesa', icone: 'gamepad', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000007', nome: 'Salário', tipo: 'receita', icone: 'wallet', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000008', nome: 'Investimentos', tipo: 'receita', icone: 'chart', padrao: true },
-  { id: '10000000-0000-4000-8000-000000000009', nome: 'Outros', tipo: 'ambos', icone: 'shapes', padrao: true },
+  { id: '10000000-0000-4000-8000-000000000001', nome: 'Alimentação', tipo: 'despesa' },
+  { id: '10000000-0000-4000-8000-000000000002', nome: 'Transporte', tipo: 'despesa' },
+  { id: '10000000-0000-4000-8000-000000000003', nome: 'Moradia', tipo: 'despesa' },
+  { id: '10000000-0000-4000-8000-000000000004', nome: 'Saúde', tipo: 'despesa' },
+  { id: '10000000-0000-4000-8000-000000000005', nome: 'Educação', tipo: 'despesa' },
+  { id: '10000000-0000-4000-8000-000000000006', nome: 'Lazer', tipo: 'despesa' },
+  { id: '10000000-0000-4000-8000-000000000007', nome: 'Salário', tipo: 'receita' },
+  { id: '10000000-0000-4000-8000-000000000008', nome: 'Investimentos', tipo: 'receita' },
+  { id: '10000000-0000-4000-8000-000000000009', nome: 'Outros', tipo: 'ambos' },
 ]
 
 function emptyDatabase(): Database {
@@ -142,7 +142,7 @@ function csvDasTransacoes(transacoes: Transacao[]): Blob {
 
 class LocalFinanceClient implements FinanceClient {
   async listarCategorias(): Promise<Categoria[]> {
-    return loadDatabase().categorias.sort((a, b) => Number(b.padrao) - Number(a.padrao) || a.nome.localeCompare(b.nome))
+    return loadDatabase().categorias.sort((a, b) => a.nome.localeCompare(b.nome))
   }
 
   async criarCategoria(input: CategoriaInput): Promise<Categoria> {
@@ -151,7 +151,7 @@ class LocalFinanceClient implements FinanceClient {
     if (database.categorias.some((category) => category.nome.toLocaleLowerCase('pt-BR') === valid.nome.toLocaleLowerCase('pt-BR'))) {
       throw new AppError('Já existe uma categoria com esse nome', 409)
     }
-    const category: Categoria = { ...valid, id: crypto.randomUUID(), padrao: false }
+    const category: Categoria = { ...valid, id: crypto.randomUUID() }
     database.categorias.push(category)
     saveDatabase(database)
     return category
@@ -178,7 +178,6 @@ class LocalFinanceClient implements FinanceClient {
     const database = loadDatabase()
     const category = database.categorias.find((item) => item.id === id)
     if (!category) throw new AppError('Categoria não encontrada', 404)
-    if (category.padrao) throw new AppError('Categorias padrão não podem ser excluídas', 409)
     if (database.transacoes.some((transaction) => transaction.categoriaId === id)) {
       throw new AppError('Esta categoria está vinculada a transações e não pode ser excluída', 409)
     }

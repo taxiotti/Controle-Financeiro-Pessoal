@@ -21,6 +21,7 @@ def api(tmp_path, monkeypatch):
         connection.execute("PRAGMA foreign_keys=ON")
 
     Base.metadata.create_all(engine)
+    monkeypatch.setattr(settings, "dev_user_email", "dev@example.com")
     monkeypatch.setattr(settings, "dev_user_password", "test-password")
     with Session(engine) as db:
         seed(db)
